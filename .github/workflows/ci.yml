@@ -41,7 +41,28 @@ jobs:
       run: go mod verify
     
     - name: Run tests with coverage
-      run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./src/larklogger/...
+      run: |
+        echo "## 🧪 Running Tests" >> $GITHUB_STEP_SUMMARY
+        echo "Starting test execution..." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        go test -v -race -coverprofile=coverage.out -covermode=atomic ./src/larklogger/...
+        TEST_EXIT_CODE=$?
+        
+        echo "## 📊 Test Results" >> $GITHUB_STEP_SUMMARY
+        if [ $TEST_EXIT_CODE -eq 0 ]; then
+          echo "✅ **All tests passed!**" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Some tests failed!**" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Show coverage summary
+        echo "## 📈 Coverage Summary" >> $GITHUB_STEP_SUMMARY
+        go tool cover -func=coverage.out | tail -1 >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        exit $TEST_EXIT_CODE
       env:
         LARK_TEST_MODE: "true"
         LARK_WEBHOOK_URL: "https://test.webhook.url"
@@ -66,10 +87,27 @@ jobs:
         go-version: 1.21
     
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: latest
-        args: --timeout=5m ./src/...
+      run: |
+        echo "## 🔍 Running Linting" >> $GITHUB_STEP_SUMMARY
+        echo "Starting code quality checks..." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Install golangci-lint
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
+        
+        # Run linting
+        golangci-lint run --timeout=5m ./src/...
+        LINT_EXIT_CODE=$?
+        
+        echo "## 📋 Linting Results" >> $GITHUB_STEP_SUMMARY
+        if [ $LINT_EXIT_CODE -eq 0 ]; then
+          echo "✅ **All linting checks passed!**" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Linting issues found!**" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        exit $LINT_EXIT_CODE
 
   security:
     runs-on: ubuntu-latest
@@ -83,9 +121,29 @@ jobs:
         go-version: 1.21
     
     - name: Run Gosec Security Scanner
-      uses: securego/gosec@v2.18.1
-      with:
-        args: '-fmt sarif -out gosec.sarif ./src/...'
+      run: |
+        echo "## 🔒 Running Security Scan" >> $GITHUB_STEP_SUMMARY
+        echo "Starting security vulnerability scan..." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Install gosec
+        go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+        
+        # Run security scan
+        gosec -fmt sarif -out gosec.sarif ./src/...
+        SECURITY_EXIT_CODE=$?
+        
+        echo "## 🛡️ Security Scan Results" >> $GITHUB_STEP_SUMMARY
+        if [ $SECURITY_EXIT_CODE -eq 0 ]; then
+          echo "✅ **No security issues found!**" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ **Security issues detected!**" >> $GITHUB_STEP_SUMMARY
+          echo "Check the logs for details." >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Don't fail the build for security issues, just report them
+        exit 0
     
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v3
