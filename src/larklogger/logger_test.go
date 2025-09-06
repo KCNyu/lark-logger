@@ -60,6 +60,11 @@ func TestLarkLoggerBuildLogCard(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
+		}
+		if card.Card.Header.Title.Content == "" {
+			t.Error("Expected header title content to not be empty")
+			return
 		}
 		if card.Card.Header.Title.Content == "" {
 			t.Error("Expected card header title to not be empty")
@@ -85,6 +90,11 @@ func TestLarkLoggerBuildLogCard(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
+		}
+		if card.Card.Header.Title.Content == "" {
+			t.Error("Expected header title content to not be empty")
+			return
 		}
 		if !contains(card.Card.Header.Title.Content, "❌") {
 			t.Error("Expected title to contain ❌")
@@ -103,6 +113,11 @@ func TestLarkLoggerBuildLogCard(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
+		}
+		if card.Card.Header.Title.Content == "" {
+			t.Error("Expected header title content to not be empty")
+			return
 		}
 		if !contains(card.Card.Header.Title.Content, "⚠️") {
 			t.Error("Expected title to contain ⚠️")

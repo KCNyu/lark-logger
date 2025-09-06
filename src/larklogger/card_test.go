@@ -14,6 +14,7 @@ func TestCardBuilder(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
 		}
 		if card.Card.Config.WideScreenMode != true {
 			t.Error("Expected WideScreenMode to be true")
@@ -25,6 +26,10 @@ func TestCardBuilder(t *testing.T) {
 			t.Error("Expected UpdateMulti to be true")
 		}
 
+		if card.Card.Header.Title.Content == "" {
+			t.Error("Expected header title content to not be empty")
+			return
+		}
 		if card.Card.Header.Title.Content != "Test Title" {
 			t.Errorf("Expected title 'Test Title', got %s", card.Card.Header.Title.Content)
 		}
@@ -50,6 +55,7 @@ func TestCardBuilder(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
 		}
 		if len(card.Card.Elements) < 2 {
 			t.Errorf("Expected at least 2 elements, got %d", len(card.Card.Elements))
@@ -64,6 +70,7 @@ func TestCardBuilder(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
 		}
 		if len(card.Card.Elements) < 1 {
 			t.Errorf("Expected at least 1 element, got %d", len(card.Card.Elements))
@@ -84,6 +91,7 @@ func TestCardBuilder(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
 		}
 		if len(card.Card.Elements) < 1 {
 			t.Errorf("Expected at least 1 element, got %d", len(card.Card.Elements))
@@ -108,6 +116,7 @@ func TestCardBuilder(t *testing.T) {
 
 		if card == nil {
 			t.Error("Expected card to not be nil")
+			return
 		}
 		if len(card.Card.Elements) < 4 {
 			t.Errorf("Expected at least 4 elements, got %d", len(card.Card.Elements))
@@ -154,6 +163,7 @@ func TestNewCardField(t *testing.T) {
 	}
 	if field.Text == nil {
 		t.Error("Expected Text to not be nil")
+		return
 	}
 	if field.Text.Content != "Test content" {
 		t.Errorf("Expected content 'Test content', got %s", field.Text.Content)
