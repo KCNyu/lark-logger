@@ -1,4 +1,4 @@
-# larklogger
+# lark-logger
 
 [![CI](https://github.com/KCNyu/lark-logger/workflows/CI/badge.svg)](https://github.com/KCNyu/lark-logger/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/KCNyu/lark-logger)](https://goreportcard.com/report/github.com/KCNyu/lark-logger)
