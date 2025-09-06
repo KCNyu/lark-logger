@@ -12,10 +12,18 @@
 ## ✨ 特性
 
 - 🎨 **美观的卡片格式** - 支持emoji、颜色模板和Markdown格式
-- 📊 **结构化日志** - 支持`map[string]interface{}`参数，自动格式化层级数据
-- 🚦 **多级别日志** - 支持Info、Warn、Error三种级别，每种级别都有独特的样式
+- 📊 **结构化日志** - 支持`map[string]interface{}`参数，智能格式化显示
+- 🚦 **多级别日志** - 支持Info、Warn、Error三种级别，每种级别都有独特的样式和颜色
 - 🔄 **重试机制** - 内置重试逻辑，确保消息可靠送达
 - ⚙️ **类型安全配置** - 使用函数式选项模式，提供类型安全的配置
+- 🎨 **自定义标题** - 支持自定义主标题和格式化副标题
+- 📋 **智能字段显示** - 清晰的KV表格布局，良好的对齐和可读性
+- 🔧 **增强布局** - 专业的两列布局，交替行颜色
+- 📱 **移动端优化** - 响应式设计，合适的填充和字体大小
+- 🎨 **视觉层次** - 标题和内容的不同字体大小和颜色
+- 🚀 **简化API** - 支持Infof/Warnf/Errorf方法，键值对参数
+- 🔧 **配置显示** - 可选的2x2网格布局显示logger配置（默认隐藏）
+- 🎯 **环境管理** - 智能环境变量处理，支持本地/CI/测试模式
 - 🧪 **完整测试覆盖** - 包含单元测试和集成测试
 - 🚀 **CI/CD就绪** - 包含GitHub Actions工作流和GoReleaser配置
 
@@ -80,37 +88,46 @@ export LARK_WEBHOOK_URL="https://test.webhook.url"
 package main
 
 import (
-    "time"
     "github.com/KCNyu/lark-logger"
 )
 
 func main() {
-    // 简化API：直接使用webhook URL和选项创建logger
+    // 从环境变量获取webhook URL
+    webhookURL := larklogger.GetWebhookURL()
+
+    // 使用webhook URL和选项创建logger
     logger := larklogger.New(
-        "https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url",
-        larklogger.WithTimeout(10*time.Second),
-        larklogger.WithRetry(3, 1*time.Second),
-        larklogger.WithService("my-service"),
+        webhookURL,
         larklogger.WithEnv("production"),
-        larklogger.WithHostname("web-server-01"),
+        larklogger.WithTitle("系统监控"),
     )
 
-    // 发送不同级别的日志
-    logger.Info("Service started successfully", map[string]interface{}{
+    // 使用传统map格式发送日志
+    logger.Info("API网关初始化成功", map[string]interface{}{
         "port":     8080,
-        "version":  "1.2.3",
-        "features": []string{"auth", "api", "metrics"},
+        "version":  "2.1.0",
+        "features": []string{"authentication", "rate_limiting", "metrics"},
     })
 
-    logger.Warn("High memory usage detected", map[string]interface{}{
-        "memory_usage": "85%",
-        "threshold":    "80%",
-    })
+    // 使用简化的Infof/Warnf/Errorf格式发送日志
+    logger.Infof("服务健康检查", "status", "healthy", "response_time", "120ms", "uptime", "2h30m")
+    logger.Warnf("内存使用率接近阈值", "usage", "87%", "threshold", "85%", "recommendation", "考虑水平扩展")
+    logger.Errorf("数据库连接池耗尽", "error", "连接超时30秒", "retry_count", 3, "pool_size", 20)
 
-    logger.Error("Database connection failed", map[string]interface{}{
-        "error":       "connection timeout",
-        "retry_count": 3,
-        "database":    "postgresql",
+    // 创建启用配置显示的logger
+    configLogger := larklogger.New(
+        webhookURL,
+        larklogger.WithService("config-demo"),
+        larklogger.WithEnv("production"),
+        larklogger.WithHostname("server-01"),
+        larklogger.WithTitle("配置演示"),
+        larklogger.WithShowConfig(true), // 启用配置区块
+    )
+
+    // 这将显示配置区块，使用2x2网格布局
+    configLogger.Info("配置区块已启用", map[string]interface{}{
+        "feature": "config_visibility",
+        "status":  "enabled",
     })
 }
 ```
@@ -168,14 +185,20 @@ WithHeaders(headers map[string]string) ClientOption
 ### Logger 配置选项
 
 ```go
-// 服务名称
+// 服务名称（可选，默认为"larklogger"）
 WithService(service string) LoggerOption
 
-// 环境标识
+// 环境标识（可选，默认为"development"）
 WithEnv(env string) LoggerOption
 
-// 主机名
+// 主机名（可选，默认为"localhost"）
 WithHostname(hostname string) LoggerOption
+
+// 日志卡片的自定义标题（可选，默认为"System Log"）
+WithTitle(title string) LoggerOption
+
+// 在卡片中显示配置区块（可选，默认为false）
+WithShowConfig(show bool) LoggerOption
 ```
 
 ## 🎨 日志级别样式
@@ -204,19 +227,23 @@ go tool cover -html=coverage.out
 ## 📁 项目结构
 
 ```
-larklogger/
+lark-logger/
 ├── .github/
 │   └── workflows/          # GitHub Actions 工作流
+├── cmd/                    # 示例应用程序
 ├── docs/                   # 文档
-├── examples/               # 使用示例
-├── internal/
-│   └── larklogger/         # 内部包
+├── scripts/                # 工具脚本
+├── src/
+│   └── larklogger/         # 主包
 │       ├── *.go           # 源文件
 │       └── *_test.go      # 测试文件
 ├── go.mod                  # Go 模块文件
 ├── larklogger.go          # 主包导出
-├── Dockerfile              # Docker 配置
+├── .golangci.yml          # Linter 配置
 ├── .goreleaser.yml         # GoReleaser 配置
+├── Dockerfile              # Docker 配置
+├── Makefile                # 构建自动化
+├── env.example             # 环境变量示例
 └── README.md               # 项目文档
 ```
 
@@ -242,13 +269,20 @@ go mod download
 
 3. 运行测试：
 ```bash
-go test -v ./internal/larklogger/...
+go test -v ./src/larklogger/...
 ```
 
 4. 运行示例：
 ```bash
-cd examples/basic
-go run main.go
+go run ./cmd/main.go
+```
+
+5. 使用Makefile运行：
+```bash
+make run          # 使用环境变量运行示例
+make test         # 运行测试
+make lint         # 运行linter
+make ci           # 运行完整CI流程
 ```
 
 ### 代码质量

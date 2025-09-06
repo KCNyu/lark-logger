@@ -12,16 +12,18 @@ An elegant Go SDK for sending structured log messages to Lark (Feishu) webhook b
 ## ✨ Features
 
 - 🎨 **Beautiful Card Formatting** - Support for emojis, color templates, and Markdown formatting
-- 📊 **Structured Logging** - Support for `map[string]interface{}` parameters with smart formatting and emoji assignment
+- 📊 **Structured Logging** - Support for `map[string]interface{}` parameters with smart formatting
 - 🚦 **Multi-level Logging** - Support for Info, Warn, and Error levels with unique styling and colors
 - 🔄 **Retry Mechanism** - Built-in retry logic to ensure reliable message delivery
 - ⚙️ **Type-safe Configuration** - Using functional options pattern for type-safe configuration
 - 🎨 **Custom Titles** - Support for custom main titles and formatted subtitles with time and service info
-- 📋 **Smart Field Display** - Automatic emoji assignment and value formatting for better readability
-- 🔧 **Enhanced Two-column Layout** - Professional KV table with alternating row colors and proper alignment
+- 📋 **Smart Field Display** - Clean KV table layout with proper alignment and readability
+- 🔧 **Enhanced Layout** - Professional two-column layout with alternating row colors
 - 📱 **Mobile Optimization** - Responsive design with proper padding and font sizing
-- 🎨 **Visual Hierarchy** - Different font sizes and colors for headers, important values, and regular content
-- 🚀 **Simplified API** - Support for Infof/Warnf/Errorf methods with key-value pairs (no need for map[string]interface{})
+- 🎨 **Visual Hierarchy** - Different font sizes and colors for headers and content
+- 🚀 **Simplified API** - Support for Infof/Warnf/Errorf methods with key-value pairs
+- 🔧 **Configuration Display** - Optional 2x2 grid layout for logger configuration (hidden by default)
+- 🎯 **Environment Management** - Smart environment variable handling for local/CI/test modes
 - 🧪 **Complete Test Coverage** - Includes unit tests and integration tests
 - 🚀 **CI/CD Ready** - Includes GitHub Actions workflows and GoReleaser configuration
 
@@ -86,25 +88,19 @@ For CI and testing environments, the following environment variables are automat
 package main
 
 import (
-    "time"
     "github.com/KCNyu/lark-logger"
 )
 
 func main() {
-    // Simplified API: Create logger directly with webhook URL and options
-    logger := larklogger.New(
-        "https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url",
-        larklogger.WithTimeout(10*time.Second),
-        larklogger.WithRetry(3, 1*time.Second),
-        larklogger.WithService("my-service"),
-        larklogger.WithEnv("production"),
-        larklogger.WithHostname("web-server-01"),
-        larklogger.WithTitle("🚀 System Monitor"),
-    )
+    // Get webhook URL from environment variable
+    webhookURL := larklogger.GetWebhookURL()
 
-    // Alternative: Traditional two-step approach (still supported)
-    // client := larklogger.NewClient(webhookURL, clientOpts...)
-    // logger := larklogger.NewLogger(client, loggerOpts...)
+    // Create logger with webhook URL and options
+    logger := larklogger.New(
+        webhookURL,
+        larklogger.WithEnv("production"),
+        larklogger.WithTitle("System Monitor"),
+    )
 
     // Send logs using traditional map format
     logger.Info("API Gateway initialized successfully", map[string]interface{}{
@@ -113,10 +109,26 @@ func main() {
         "features": []string{"authentication", "rate_limiting", "metrics"},
     })
 
-    // Send logs using new simplified Infof/Warnf/Errorf format
+    // Send logs using simplified Infof/Warnf/Errorf format
     logger.Infof("Service health check", "status", "healthy", "response_time", "120ms", "uptime", "2h30m")
     logger.Warnf("Memory usage approaching threshold", "usage", "87%", "threshold", "85%", "recommendation", "consider horizontal scaling")
     logger.Errorf("Database connection pool exhausted", "error", "connection timeout after 30s", "retry_count", 3, "pool_size", 20)
+
+    // Create logger with configuration display enabled
+    configLogger := larklogger.New(
+        webhookURL,
+        larklogger.WithService("config-demo"),
+        larklogger.WithEnv("production"),
+        larklogger.WithHostname("server-01"),
+        larklogger.WithTitle("Config Demo"),
+        larklogger.WithShowConfig(true), // Enable configuration section
+    )
+
+    // This will show the configuration section with 2x2 grid layout
+    configLogger.Info("Configuration section enabled", map[string]interface{}{
+        "feature": "config_visibility",
+        "status":  "enabled",
+    })
 }
 ```
 
@@ -228,6 +240,9 @@ WithHostname(hostname string) LoggerOption
 
 // Custom title for log cards (optional, defaults to "System Log")
 WithTitle(title string) LoggerOption
+
+// Show configuration section in cards (optional, defaults to false)
+WithShowConfig(show bool) LoggerOption
 ```
 
 ### Card Builder Methods
@@ -331,19 +346,23 @@ go tool cover -html=coverage.out
 ## 📁 Project Structure
 
 ```
-larklogger/
+lark-logger/
 ├── .github/
 │   └── workflows/          # GitHub Actions workflows
+├── cmd/                    # Example application
 ├── docs/                   # Documentation
-├── examples/               # Usage examples
-├── internal/
-│   └── larklogger/         # Internal package
+├── scripts/                # Utility scripts
+├── src/
+│   └── larklogger/         # Main package
 │       ├── *.go           # Source files
 │       └── *_test.go      # Test files
 ├── go.mod                  # Go module file
 ├── larklogger.go          # Main package exports
-├── Dockerfile              # Docker configuration
+├── .golangci.yml          # Linter configuration
 ├── .goreleaser.yml         # GoReleaser configuration
+├── Dockerfile              # Docker configuration
+├── Makefile                # Build automation
+├── env.example             # Environment variables example
 └── README.md               # Project documentation
 ```
 
@@ -369,13 +388,20 @@ go mod download
 
 3. Run tests:
 ```bash
-go test -v ./internal/larklogger/...
+go test -v ./src/larklogger/...
 ```
 
-4. Run examples:
+4. Run example:
 ```bash
-cd examples/basic
-go run main.go
+go run ./cmd/main.go
+```
+
+5. Run with Makefile:
+```bash
+make run          # Run example with environment variables
+make test         # Run tests
+make lint         # Run linter
+make ci           # Run full CI pipeline
 ```
 
 ### Code Quality
