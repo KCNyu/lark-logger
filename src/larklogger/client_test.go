@@ -105,7 +105,7 @@ func TestLarkClientSendText(t *testing.T) {
 			"msg":  "success",
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 	defer server.Close()
 
@@ -150,7 +150,7 @@ func TestLarkClientSendCard(t *testing.T) {
 			"msg":  "success",
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 	defer server.Close()
 
@@ -176,7 +176,7 @@ func TestLarkClientErrorHandling(t *testing.T) {
 				"msg":  "invalid webhook",
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(response)
+			_ = json.NewEncoder(w).Encode(response)
 		}))
 		defer server.Close()
 
@@ -195,7 +195,7 @@ func TestLarkClientErrorHandling(t *testing.T) {
 	t.Run("server returns non-200 status", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Bad Request"))
+			_, _ = w.Write([]byte("Bad Request"))
 		}))
 		defer server.Close()
 

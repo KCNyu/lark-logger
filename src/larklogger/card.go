@@ -571,16 +571,3 @@ func GetLogLevelEmoji(level LogLevel) string {
 	}
 }
 
-// getLogLevelColor returns color template for log level
-func getLogLevelColor(level LogLevel) string {
-	switch level {
-	case LevelInfo:
-		return "blue"
-	case LevelWarn:
-		return "yellow"
-	case LevelError:
-		return "red"
-	default:
-		return "blue"
-	}
-}

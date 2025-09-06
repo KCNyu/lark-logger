@@ -147,6 +147,7 @@ func TestNewCardField(t *testing.T) {
 
 	if field == nil {
 		t.Error("Expected field to not be nil")
+		return
 	}
 	if !field.IsShort {
 		t.Error("Expected IsShort to be true")

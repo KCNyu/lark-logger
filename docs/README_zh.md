@@ -279,7 +279,7 @@ go run main.go
 如果你遇到任何问题或有建议，请：
 
 - 提交 [Issue](https://github.com/KCNyu/lark-logger/issues)
-- 发送邮件到 [KCNyu@example.com](mailto:KCNyu@example.com)
+- 发送邮件到 [KCNyu@example.com](mailto:shengyu.li.evgeny@gmail.com)
 
 ## 🙏 致谢
 

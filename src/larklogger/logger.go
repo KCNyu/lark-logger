@@ -3,7 +3,6 @@ package larklogger
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 // LogLevel represents the log level
@@ -169,88 +168,8 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	return builder.Build()
 }
 
-// getStatusText returns status text based on log level
-func (l *LarkLogger) getStatusText(level LogLevel) string {
-	switch level {
-	case LevelInfo:
-		return "System running normally"
-	case LevelWarn:
-		return "Performance degradation detected"
-	case LevelError:
-		return "Critical error occurred"
-	default:
-		return "Unknown status"
-	}
-}
 
-// getFieldEmoji returns appropriate emoji for field key
-func (l *LarkLogger) getFieldEmoji(key string) string {
-	keyLower := strings.ToLower(key)
 
-	switch {
-	case strings.Contains(keyLower, "error") || strings.Contains(keyLower, "exception"):
-		return "❌"
-	case strings.Contains(keyLower, "warning") || strings.Contains(keyLower, "warn"):
-		return "⚠️"
-	case strings.Contains(keyLower, "success") || strings.Contains(keyLower, "ok"):
-		return "✅"
-	case strings.Contains(keyLower, "time") || strings.Contains(keyLower, "duration"):
-		return "⏱️"
-	case strings.Contains(keyLower, "memory") || strings.Contains(keyLower, "ram"):
-		return "💾"
-	case strings.Contains(keyLower, "cpu") || strings.Contains(keyLower, "processor"):
-		return "🖥️"
-	case strings.Contains(keyLower, "network") || strings.Contains(keyLower, "connection"):
-		return "🌐"
-	case strings.Contains(keyLower, "database") || strings.Contains(keyLower, "db"):
-		return "🗄️"
-	case strings.Contains(keyLower, "user") || strings.Contains(keyLower, "client"):
-		return "👤"
-	case strings.Contains(keyLower, "request") || strings.Contains(keyLower, "api"):
-		return "📡"
-	case strings.Contains(keyLower, "file") || strings.Contains(keyLower, "path"):
-		return "📁"
-	case strings.Contains(keyLower, "port") || strings.Contains(keyLower, "address"):
-		return "🔌"
-	case strings.Contains(keyLower, "version") || strings.Contains(keyLower, "v"):
-		return "🏷️"
-	case strings.Contains(keyLower, "count") || strings.Contains(keyLower, "number"):
-		return "🔢"
-	case strings.Contains(keyLower, "size") || strings.Contains(keyLower, "length"):
-		return "📏"
-	case strings.Contains(keyLower, "status") || strings.Contains(keyLower, "state"):
-		return "📊"
-	default:
-		return "📋"
-	}
-}
-
-// formatFieldValue formats field value for display
-func (l *LarkLogger) formatFieldValue(value interface{}) string {
-	if value == nil {
-		return "-"
-	}
-
-	switch v := value.(type) {
-	case string:
-		if len(v) > 100 {
-			return v[:97] + "..."
-		}
-		return v
-	case int, int8, int16, int32, int64:
-		return fmt.Sprintf("%d", v)
-	case uint, uint8, uint16, uint32, uint64:
-		return fmt.Sprintf("%d", v)
-	case float32, float64:
-		return fmt.Sprintf("%.2f", v)
-	case bool:
-		return fmt.Sprintf("%t", v)
-	case time.Time:
-		return v.Format("2006-01-02 15:04:05")
-	default:
-		return fmt.Sprintf("%v", v)
-	}
-}
 
 // Logger option functions
 func WithService(service string) LoggerOption {
