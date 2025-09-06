@@ -359,7 +359,7 @@ Contributions are welcome! Please follow these steps:
 If you encounter any issues or have suggestions, please:
 
 - Submit an [Issue](https://github.com/KCNyu/lark-logger/issues)
-- Send an email to [KCNyu@example.com](mailto:KCNyu@example.com)
+- Send an email to [shengyu.li.evgeny@gmail.com](mailto:shengyu.li.evgeny@gmail.com)
 
 ## 🙏 Acknowledgments
 

@@ -2,6 +2,7 @@ builds:
   - id: larklogger
     main: ./larklogger.go
     binary: larklogger
+    dir: .
     goos:
       - linux
       - windows

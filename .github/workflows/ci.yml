@@ -37,10 +37,10 @@ jobs:
       run: go mod verify
     
     - name: Run tests
-      run: go test -v -race -coverprofile=coverage.out ./internal/larklogger/...
+      run: go test -v -race -coverprofile=coverage.out ./src/larklogger/...
     
     - name: Run tests with coverage
-      run: go test -v -coverprofile=coverage.out -covermode=atomic ./internal/larklogger/...
+      run: go test -v -coverprofile=coverage.out -covermode=atomic ./src/larklogger/...
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -65,7 +65,7 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         version: latest
-        args: --timeout=5m ./internal/...
+        args: --timeout=5m ./src/...
 
   security:
     runs-on: ubuntu-latest
@@ -81,7 +81,7 @@ jobs:
     - name: Run Gosec Security Scanner
       uses: securecodewarrior/github-action-gosec@master
       with:
-        args: '-fmt sarif -out gosec.sarif ./internal/...'
+        args: '-fmt sarif -out gosec.sarif ./src/...'
     
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v2
@@ -103,5 +103,5 @@ jobs:
       run: go build -v .
     
     - name: Build example
-      run: cd examples/basic && go build -v .
+      run: cd cmd && go build -v .
 
