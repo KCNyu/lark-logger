@@ -1,7 +1,7 @@
 builds:
-  - id: larklogger
-    main: ./larklogger.go
-    binary: larklogger
+  - id: example
+    main: ./cmd
+    binary: lark-logger-example
     dir: .
     goos:
       - linux
@@ -35,11 +35,11 @@ changelog:
       - '^docs:'
       - '^test:'
 
-dockers:
-  - image_templates:
-      - "kcnyu/lark-logger:{{ .Version }}"
-      - "kcnyu/lark-logger:latest"
-    dockerfile: Dockerfile
-    goos: linux
-    goarch: amd64
+# dockers:
+#   - image_templates:
+#       - "kcnyu/lark-logger:{{ .Version }}"
+#       - "kcnyu/lark-logger:latest"
+#     dockerfile: Dockerfile
+#     goos: linux
+#     goarch: amd64
 
