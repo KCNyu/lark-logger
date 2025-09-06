@@ -7,7 +7,7 @@ WORKDIR /app
 RUN apk add --no-cache git ca-certificates
 
 # Copy go mod files
-COPY go.mod go.sum ./
+COPY go.mod ./
 
 # Download dependencies
 RUN go mod download
@@ -29,8 +29,8 @@ WORKDIR /root/
 # Copy the binary from builder stage
 COPY --from=builder /app/larklogger .
 
-# Copy example if needed
-COPY --from=builder /app/examples ./examples
+# Copy cmd example if needed
+COPY --from=builder /app/cmd ./cmd
 
 # Expose port (if needed for future web interface)
 EXPOSE 8080
