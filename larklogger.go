@@ -140,6 +140,10 @@ func WithTitle(title string) LoggerOption {
 	return larklogger.WithTitle(title)
 }
 
+func WithShowConfig(show bool) LoggerOption {
+	return larklogger.WithShowConfig(show)
+}
+
 // Environment configuration functions
 func GetWebhookURL() string {
 	return larklogger.GetWebhookURL()

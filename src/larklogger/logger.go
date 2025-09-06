@@ -32,10 +32,11 @@ type LarkLogger struct {
 
 // LoggerConfig holds logger configuration
 type LoggerConfig struct {
-	Service  string
-	Env      string
-	Hostname string
-	Title    string // Custom main title for log cards
+	Service      string
+	Env          string
+	Hostname     string
+	Title        string
+	ShowConfig   bool // Whether to show configuration section in logs
 }
 
 // LoggerOption is a function that configures the logger
@@ -44,10 +45,11 @@ type LoggerOption func(*LoggerConfig)
 // NewLarkLogger creates a new LarkLogger instance
 func NewLarkLogger(client *LarkClient, opts ...LoggerOption) Logger {
 	config := &LoggerConfig{
-		Service:  "default-service",
-		Env:      "development",
-		Hostname: "localhost",
-		Title:    "System Log",
+		Service:    "default-service",
+		Env:        "development",
+		Hostname:   "localhost",
+		Title:      "System Log",
+		ShowConfig: false,
 	}
 
 	for _, opt := range opts {
@@ -134,8 +136,9 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	// Create enhanced card builder
 	builder := NewCardBuilder().SetHeader(mainTitle, template)
 
-	// Add subtitle with message only (no redundant default text)
-	builder.AddSubtitle(message)
+	// Add subtitle with message and level emoji
+	subtitle := fmt.Sprintf("%s %s", getLogLevelEmoji(level), message)
+	builder.AddSubtitle(subtitle)
 
 	// Add timestamp
 	builder.AddTimestamp()
@@ -143,27 +146,31 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	// Add divider
 	builder.AddDivider()
 
-	// Prepare KV data
-	kvData := map[string]interface{}{
-		"Level":       strings.ToUpper(string(level)),
-		"Service":     l.opts.Service,
-		"Environment": l.opts.Env,
-		"Hostname":    l.opts.Hostname,
+	// Add custom fields if any
+	if len(fields) > 0 {
+		customFields := mapToKVItems(fields)
+		builder.AddKVTable(customFields)
 	}
 
-	// Add custom fields to KV data
-	for key, value := range fields {
-		kvData[key] = value
+	// Add configuration section only if ShowConfig is enabled
+	if l.opts.ShowConfig {
+		builder.AddDivider()
+		
+		// Add configuration section as 2x2 grid with emojis
+		configData := map[string]string{
+			"level":     "📊 Level",
+			"level_value": strings.ToUpper(string(level)),
+			"service":   "🔧 Service", 
+			"service_value": l.opts.Service,
+			"env":       "🌍 Environment",
+			"env_value": l.opts.Env,
+			"hostname":  "🖥️ Hostname",
+			"hostname_value": l.opts.Hostname,
+		}
+		
+		// Add config section as 2x2 grid
+		builder.AddConfigGrid(configData)
 	}
-
-	// Convert to KV list
-	kvList := mapToKVItems(kvData)
-
-	// Add KV table
-	builder.AddKVTable(kvList)
-
-	// Add optional card link (you can customize this)
-	// builder.AddCardLink("https://logs.example.com")
 
 	return builder.Build()
 }
@@ -190,5 +197,11 @@ func WithHostname(hostname string) LoggerOption {
 func WithTitle(title string) LoggerOption {
 	return func(c *LoggerConfig) {
 		c.Title = title
+	}
+}
+
+func WithShowConfig(show bool) LoggerOption {
+	return func(c *LoggerConfig) {
+		c.ShowConfig = show
 	}
 }

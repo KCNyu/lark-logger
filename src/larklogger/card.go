@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// -------------------------- Card Structure --------------------------
 
 // Card represents a Lark interactive card
 type Card struct {
@@ -20,47 +19,47 @@ type CardData struct {
 	Config       Config    `json:"config"`
 	Header       Header    `json:"header"`
 	Elements     []Element `json:"elements"`
-	CardLink     *CardLink `json:"card_link,omitempty"`     // Optional: card click link
-	CornerRadius int       `json:"corner_radius,omitempty"` // Corner radius (px, recommended 8)
+	CardLink     *CardLink `json:"card_link,omitempty"`
+	CornerRadius int       `json:"corner_radius,omitempty"`
 }
 
 // Config represents card configuration
 type Config struct {
-	WideScreenMode bool          `json:"wide_screen_mode"`         // Wide screen mode (required for layout)
-	EnableForward  bool          `json:"enable_forward,omitempty"` // Allow forwarding
-	UpdateMulti    bool          `json:"update_multi,omitempty"`   // Support multiple updates
-	IosConfig      *MobileConfig `json:"ios_config,omitempty"`     // iOS specific config
-	AndroidConfig  *MobileConfig `json:"android_config,omitempty"` // Android specific config
+	WideScreenMode bool          `json:"wide_screen_mode"`
+	EnableForward  bool          `json:"enable_forward,omitempty"`
+	UpdateMulti    bool          `json:"update_multi,omitempty"`
+	IosConfig      *MobileConfig `json:"ios_config,omitempty"`
+	AndroidConfig  *MobileConfig `json:"android_config,omitempty"`
 }
 
 // MobileConfig represents mobile configuration
 type MobileConfig struct {
-	EnableForward bool `json:"enable_forward,omitempty"` // Allow forwarding
+	EnableForward bool `json:"enable_forward,omitempty"`
 }
 
 // Header represents card header
 type Header struct {
-	Title    Title  `json:"title"`              // Main title
-	SubTitle *Title `json:"subtitle,omitempty"` // Subtitle
-	Template string `json:"template"`           // Header color
+	Title    Title  `json:"title"`
+	SubTitle *Title `json:"subtitle,omitempty"`
+	Template string `json:"template"`
 }
 
 // Title represents title structure
 type Title struct {
-	Tag      string `json:"tag"`                 // plain_text/lark_md
-	Content  string `json:"content"`             // Text content
-	FontSize string `json:"font_size,omitempty"` // Font size: default/large
+	Tag      string `json:"tag"`
+	Content  string `json:"content"`
+	FontSize string `json:"font_size,omitempty"`
 }
 
 // Element represents card element
 type Element struct {
-	Tag             string   `json:"tag"`                        // div/hr/column_set
-	Text            *Text    `json:"text,omitempty"`             // div: text content
-	Columns         []Column `json:"columns,omitempty"`          // column_set: columns
-	FlexMode        string   `json:"flex_mode,omitempty"`        // Fixed "none"
-	BackgroundStyle string   `json:"background_style,omitempty"` // Background color
-	Padding         *Padding `json:"padding,omitempty"`          // Padding
-	TextAlign       string   `json:"text_align,omitempty"`       // Text alignment
+	Tag             string   `json:"tag"`
+	Text            *Text    `json:"text,omitempty"`
+	Columns         []Column `json:"columns,omitempty"`
+	FlexMode        string   `json:"flex_mode,omitempty"`
+	BackgroundStyle string   `json:"background_style,omitempty"`
+	Padding         *Padding `json:"padding,omitempty"`
+	TextAlign       string   `json:"text_align,omitempty"`
 }
 
 // Padding represents padding structure
@@ -142,7 +141,6 @@ const (
 	BgStyleEven   = "light"   // Even rows: very light grey
 )
 
-// -------------------------- Visual Configuration --------------------------
 
 // getVisualConfig returns visual configuration based on log level
 func getVisualConfig(level LogLevel) (template string) {
@@ -150,15 +148,70 @@ func getVisualConfig(level LogLevel) (template string) {
 	case LevelInfo:
 		return "blue"
 	case LevelWarn:
-		return "yellow"
+		return "orange"
 	case LevelError:
 		return "red"
 	default:
-		return "blue"
+		return "grey"
 	}
 }
 
-// -------------------------- KV Processing --------------------------
+// getLogLevelEmoji returns emoji for log level
+func getLogLevelEmoji(level LogLevel) string {
+	switch level {
+	case LevelInfo:
+		return "ℹ️"
+	case LevelWarn:
+		return "⚠️"
+	case LevelError:
+		return "❌"
+	default:
+		return "📋"
+	}
+}
+
+// getKeyEmoji returns emoji for key type
+func getKeyEmoji(key string) string {
+	keyLower := strings.ToLower(key)
+	
+	switch {
+	case strings.Contains(keyLower, "error") || strings.Contains(keyLower, "exception"):
+		return "❌"
+	case strings.Contains(keyLower, "warning") || strings.Contains(keyLower, "warn"):
+		return "⚠️"
+	case strings.Contains(keyLower, "success") || strings.Contains(keyLower, "ok"):
+		return "✅"
+	case strings.Contains(keyLower, "time") || strings.Contains(keyLower, "duration"):
+		return "⏱️"
+	case strings.Contains(keyLower, "memory") || strings.Contains(keyLower, "ram"):
+		return "💾"
+	case strings.Contains(keyLower, "cpu") || strings.Contains(keyLower, "processor"):
+		return "🖥️"
+	case strings.Contains(keyLower, "network") || strings.Contains(keyLower, "connection"):
+		return "🌐"
+	case strings.Contains(keyLower, "database") || strings.Contains(keyLower, "db"):
+		return "🗄️"
+	case strings.Contains(keyLower, "user") || strings.Contains(keyLower, "client"):
+		return "👤"
+	case strings.Contains(keyLower, "request") || strings.Contains(keyLower, "api"):
+		return "📡"
+	case strings.Contains(keyLower, "file") || strings.Contains(keyLower, "path"):
+		return "📁"
+	case strings.Contains(keyLower, "port") || strings.Contains(keyLower, "address"):
+		return "🔌"
+	case strings.Contains(keyLower, "version") || strings.Contains(keyLower, "v"):
+		return "🏷️"
+	case strings.Contains(keyLower, "count") || strings.Contains(keyLower, "number"):
+		return "🔢"
+	case strings.Contains(keyLower, "size") || strings.Contains(keyLower, "length"):
+		return "📏"
+	case strings.Contains(keyLower, "status") || strings.Contains(keyLower, "state"):
+		return "📊"
+	default:
+		return "📋"
+	}
+}
+
 
 // KVItem represents a key-value item
 type KVItem struct {
@@ -240,7 +293,6 @@ func escapeMarkdown(content string) string {
 	return replacer.Replace(content)
 }
 
-// -------------------------- Card Builder --------------------------
 
 // CardBuilder helps build Lark cards
 type CardBuilder struct {
@@ -446,6 +498,203 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 			},
 		})
 	}
+	return cb
+}
+
+// AddKVTableWithStyle adds a key-value table with custom background style
+func (cb *CardBuilder) AddKVTableWithStyle(kvList []KVItem, bgStyle string) *CardBuilder {
+	// Add table header
+	headerColumns := []Column{
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        ColumnWeightKey,
+			VerticalAlign: "middle",
+			Elements: []ColumnElement{
+				{
+					Tag:       "markdown",
+					Content:   "**Key**",
+					TextAlign: "left",
+					FontSize:  FontSizeLarge,
+				},
+			},
+		},
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        ColumnWeightValue,
+			VerticalAlign: "middle",
+			Elements: []ColumnElement{
+				{
+					Tag:       "markdown",
+					Content:   "**Value**",
+					TextAlign: "left",
+					FontSize:  FontSizeLarge,
+				},
+			},
+		},
+	}
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
+		Tag:             "column_set",
+		Columns:         headerColumns,
+		FlexMode:        "none",
+		BackgroundStyle: bgStyle,
+		Padding: &Padding{
+			Top:    PaddingTop,
+			Bottom: PaddingBottom,
+			Left:   PaddingLeft,
+			Right:  PaddingRight,
+		},
+	})
+
+	// Add data rows with custom background style
+	for i, kv := range kvList {
+		// Use custom background style for all rows
+		rowBgStyle := bgStyle
+		if i%2 == 1 {
+			// Alternate with a slightly different shade
+			rowBgStyle = "light_grey"
+		}
+
+		rowColumns := []Column{
+			{
+				Tag:           "column",
+				Width:         "weighted",
+				Weight:        ColumnWeightKey,
+				VerticalAlign: "middle",
+				Elements: []ColumnElement{
+					{
+						Tag:       "markdown",
+						Content:   fmt.Sprintf("**%s**", kv.Key),
+						TextAlign: "left",
+						FontSize:  FontSizeDefault,
+					},
+				},
+			},
+			{
+				Tag:           "column",
+				Width:         "weighted",
+				Weight:        ColumnWeightValue,
+				VerticalAlign: "middle",
+				Elements: []ColumnElement{
+					{
+						Tag:       "markdown",
+						Content:   kv.Value,
+						TextAlign: "left",
+						FontSize:  FontSizeDefault,
+					},
+				},
+			},
+		}
+		cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
+			Tag:             "column_set",
+			Columns:         rowColumns,
+			FlexMode:        "none",
+			BackgroundStyle: rowBgStyle,
+			Padding: &Padding{
+				Top:    PaddingTop,
+				Bottom: PaddingBottom,
+				Left:   PaddingLeft,
+				Right:  PaddingRight,
+			},
+		})
+	}
+	return cb
+}
+
+// AddConfigGrid adds a 2x2 configuration grid with emojis
+func (cb *CardBuilder) AddConfigGrid(config map[string]string) *CardBuilder {
+	// Create 2x2 grid layout
+	gridColumns := []Column{
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "middle",
+			Elements: []ColumnElement{
+				{
+					Tag:       "markdown",
+					Content:   fmt.Sprintf("**%s**\n%s", config["level"], config["level_value"]),
+					TextAlign: "center",
+					FontSize:  FontSizeDefault,
+				},
+			},
+		},
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "middle",
+			Elements: []ColumnElement{
+				{
+					Tag:       "markdown",
+					Content:   fmt.Sprintf("**%s**\n%s", config["service"], config["service_value"]),
+					TextAlign: "center",
+					FontSize:  FontSizeDefault,
+				},
+			},
+		},
+	}
+	
+	// First row
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
+		Tag:             "column_set",
+		Columns:         gridColumns,
+		FlexMode:        "none",
+		BackgroundStyle: "light_blue",
+		Padding: &Padding{
+			Top:    PaddingTop,
+			Bottom: PaddingBottom,
+			Left:   PaddingLeft,
+			Right:  PaddingRight,
+		},
+	})
+
+	// Second row
+	gridColumns2 := []Column{
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "middle",
+			Elements: []ColumnElement{
+				{
+					Tag:       "markdown",
+					Content:   fmt.Sprintf("**%s**\n%s", config["env"], config["env_value"]),
+					TextAlign: "center",
+					FontSize:  FontSizeDefault,
+				},
+			},
+		},
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "middle",
+			Elements: []ColumnElement{
+				{
+					Tag:       "markdown",
+					Content:   fmt.Sprintf("**%s**\n%s", config["hostname"], config["hostname_value"]),
+					TextAlign: "center",
+					FontSize:  FontSizeDefault,
+				},
+			},
+		},
+	}
+	
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
+		Tag:             "column_set",
+		Columns:         gridColumns2,
+		FlexMode:        "none",
+		BackgroundStyle: "light_blue",
+		Padding: &Padding{
+			Top:    PaddingTop,
+			Bottom: PaddingBottom,
+			Left:   PaddingLeft,
+			Right:  PaddingRight,
+		},
+	})
+
 	return cb
 }
 

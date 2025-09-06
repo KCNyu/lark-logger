@@ -1,6 +1,7 @@
 package larklogger
 
 import (
+	"os"
 	"testing"
 )
 
@@ -166,6 +167,11 @@ func TestLoggerOptions(t *testing.T) {
 }
 
 func TestLoggerInfof(t *testing.T) {
+	// Skip tests that use mock webhook URLs
+	if os.Getenv("LARK_TEST_MODE") == "true" {
+		t.Skip("Skipping mock webhook tests")
+	}
+	
 	client := NewLarkClient("https://test.webhook.url")
 	logger := NewLarkLogger(client, WithTitle("Test Logger"))
 

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
 	larklogger "github.com/KCNyu/lark-logger"
 )
@@ -23,12 +22,12 @@ func main() {
 	// Simplified API: Create logger directly with webhook URL and options
 	logger := larklogger.New(
 		webhookURL,
-		larklogger.WithTimeout(10*time.Second),
-		larklogger.WithRetry(3, 1*time.Second),
-		larklogger.WithService("api-gateway"),
+		// larklogger.WithTimeout(10*time.Second),
+		// larklogger.WithRetry(3, 1*time.Second),
+		// larklogger.WithService("api-gateway"),
 		larklogger.WithEnv("production"),
-		larklogger.WithHostname("web-server-01"),
-		larklogger.WithTitle("🚀 System Monitor"),
+		// larklogger.WithHostname("web-server-01"),
+		larklogger.WithTitle("System Monitor"),
 	)
 
 	// Alternative: Traditional two-step approach (still supported)
@@ -46,6 +45,22 @@ func main() {
 			"ssl":      true,
 		},
 		"uptime": "0s",
+	})
+
+	// Create a logger with configuration section enabled
+	configLogger := larklogger.New(
+		webhookURL,
+		larklogger.WithService("config-demo"),
+		larklogger.WithEnv("production"),
+		larklogger.WithHostname("server-01"),
+		larklogger.WithTitle("Config Demo"),
+		larklogger.WithShowConfig(true), // Enable configuration section
+	)
+
+	// This will show the configuration section with light blue background
+	configLogger.Info("Configuration section enabled", map[string]interface{}{
+		"feature": "config_visibility",
+		"status":  "enabled",
 	})
 
 	// Send logs using new Infof/Warnf/Errorf format (simplified)
