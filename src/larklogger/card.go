@@ -7,6 +7,23 @@ import (
 	"time"
 )
 
+// Emoji constants
+const (
+	EmojiInfo    = "ℹ️"
+	EmojiWarn    = "⚠️"
+	EmojiError   = "❌"
+	EmojiDefault = "📋"
+)
+
+// Color constants
+const (
+	ColorBlue   = "blue"
+	ColorGreen  = "green"
+	ColorOrange = "orange"
+	ColorRed    = "red"
+	ColorGrey   = "grey"
+)
+
 // Card represents a Lark interactive card
 type Card struct {
 	MsgType string   `json:"msg_type"`
@@ -144,13 +161,13 @@ const (
 func getVisualConfig(level LogLevel) (template string) {
 	switch level {
 	case LevelInfo:
-		return "blue"
+		return ColorBlue
 	case LevelWarn:
-		return "orange"
+		return ColorOrange
 	case LevelError:
-		return "red"
+		return ColorRed
 	default:
-		return "grey"
+		return ColorGrey
 	}
 }
 
@@ -158,13 +175,13 @@ func getVisualConfig(level LogLevel) (template string) {
 func getLogLevelEmoji(level LogLevel) string {
 	switch level {
 	case LevelInfo:
-		return "ℹ️"
+		return EmojiInfo
 	case LevelWarn:
-		return "⚠️"
+		return EmojiWarn
 	case LevelError:
-		return "❌"
+		return EmojiError
 	default:
-		return "📋"
+		return EmojiDefault
 	}
 }
 
@@ -174,9 +191,9 @@ func getKeyEmoji(key string) string {
 
 	switch {
 	case strings.Contains(keyLower, "error") || strings.Contains(keyLower, "exception"):
-		return "❌"
+		return EmojiError
 	case strings.Contains(keyLower, "warning") || strings.Contains(keyLower, "warn"):
-		return "⚠️"
+		return EmojiWarn
 	case strings.Contains(keyLower, "success") || strings.Contains(keyLower, "ok"):
 		return "✅"
 	case strings.Contains(keyLower, "time") || strings.Contains(keyLower, "duration"):
@@ -206,7 +223,7 @@ func getKeyEmoji(key string) string {
 	case strings.Contains(keyLower, "status") || strings.Contains(keyLower, "state"):
 		return "📊"
 	default:
-		return "📋"
+		return EmojiDefault
 	}
 }
 
@@ -713,9 +730,9 @@ func (cb *CardBuilder) AddKeyValueList(title string, kv map[string]interface{}) 
 func (cb *CardBuilder) AddStatusBadge(status, message string) *CardBuilder {
 	emoji := "✅"
 	if status == "error" || status == "failed" {
-		emoji = "❌"
+		emoji = EmojiError
 	} else if status == "warning" || status == "warn" {
-		emoji = "⚠️"
+		emoji = EmojiWarn
 	}
 
 	cb.AddSection(fmt.Sprintf("%s **Status**: %s", emoji, message))
@@ -809,12 +826,12 @@ func FormatTimestamp(t time.Time) string {
 func GetLogLevelEmoji(level LogLevel) string {
 	switch level {
 	case LevelInfo:
-		return "ℹ️"
+		return EmojiInfo
 	case LevelWarn:
-		return "⚠️"
+		return EmojiWarn
 	case LevelError:
-		return "❌"
+		return EmojiError
 	default:
-		return "📋"
+		return EmojiDefault
 	}
 }

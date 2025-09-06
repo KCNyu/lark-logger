@@ -171,7 +171,7 @@ func TestLoggerInfof(t *testing.T) {
 	if os.Getenv("LARK_TEST_MODE") == "true" {
 		t.Skip("Skipping mock webhook tests")
 	}
-	
+
 	client := NewLarkClient("https://test.webhook.url")
 	logger := NewLarkLogger(client, WithTitle("Test Logger"))
 
