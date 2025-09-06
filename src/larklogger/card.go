@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-
 // Card represents a Lark interactive card
 type Card struct {
 	MsgType string   `json:"msg_type"`
@@ -141,7 +140,6 @@ const (
 	BgStyleEven   = "light"   // Even rows: very light grey
 )
 
-
 // getVisualConfig returns visual configuration based on log level
 func getVisualConfig(level LogLevel) (template string) {
 	switch level {
@@ -173,7 +171,7 @@ func getLogLevelEmoji(level LogLevel) string {
 // getKeyEmoji returns emoji for key type
 func getKeyEmoji(key string) string {
 	keyLower := strings.ToLower(key)
-	
+
 	switch {
 	case strings.Contains(keyLower, "error") || strings.Contains(keyLower, "exception"):
 		return "❌"
@@ -211,7 +209,6 @@ func getKeyEmoji(key string) string {
 		return "📋"
 	}
 }
-
 
 // KVItem represents a key-value item
 type KVItem struct {
@@ -292,7 +289,6 @@ func escapeMarkdown(content string) string {
 	)
 	return replacer.Replace(content)
 }
-
 
 // CardBuilder helps build Lark cards
 type CardBuilder struct {
@@ -403,9 +399,9 @@ func (cb *CardBuilder) AddDivider() *CardBuilder {
 
 // AddKVTable adds professional KV table with alternating colors
 func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
-	// Add section title with emoji
-	cb.AddSection("📊 **Data Fields**")
-	
+	// Add section title
+	cb.AddSection("📊 Data Fields")
+
 	// Add table header with enhanced styling
 	headerColumns := []Column{
 		{
@@ -458,9 +454,6 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 			bgStyle = "light"
 		}
 
-		// Get emoji for key type
-		keyEmoji := getKeyEmoji(kv.Key)
-
 		dataColumns := []Column{
 			{
 				Tag:           "column",
@@ -470,7 +463,7 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 				Elements: []ColumnElement{
 					{
 						Tag:       "markdown",
-						Content:   fmt.Sprintf("%s **%s**", keyEmoji, escapeMarkdown(kv.Key)),
+						Content:   fmt.Sprintf("**%s**", kv.Key),
 						TextAlign: "left",
 					},
 				},
@@ -483,7 +476,7 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 				Elements: []ColumnElement{
 					{
 						Tag:       "markdown",
-						Content:   fmt.Sprintf("`%s`", kv.Value),
+						Content:   kv.Value,
 						TextAlign: "left",
 						FontSize:  FontSizeDefault,
 					},
@@ -641,7 +634,7 @@ func (cb *CardBuilder) AddConfigGrid(config map[string]string) *CardBuilder {
 			},
 		},
 	}
-	
+
 	// First row
 	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
 		Tag:             "column_set",
@@ -687,7 +680,7 @@ func (cb *CardBuilder) AddConfigGrid(config map[string]string) *CardBuilder {
 			},
 		},
 	}
-	
+
 	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
 		Tag:             "column_set",
 		Columns:         gridColumns2,

@@ -143,19 +143,10 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	// Add timestamp
 	builder.AddTimestamp()
 
-	// Add divider
-	builder.AddDivider()
-
-	// Add custom fields if any
-	if len(fields) > 0 {
-		customFields := mapToKVItems(fields)
-		builder.AddKVTable(customFields)
-	}
-
 	// Add configuration section only if ShowConfig is enabled
 	if l.opts.ShowConfig {
 		builder.AddDivider()
-
+		
 		// Add configuration section as 2x2 grid with emojis
 		configData := map[string]string{
 			"level":          "📊 Level",
@@ -167,9 +158,16 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 			"hostname":       "🖥️ Hostname",
 			"hostname_value": l.opts.Hostname,
 		}
-
+		
 		// Add config section as 2x2 grid
 		builder.AddConfigGrid(configData)
+	}
+
+	// Add custom fields if any
+	if len(fields) > 0 {
+		builder.AddDivider()
+		customFields := mapToKVItems(fields)
+		builder.AddKVTable(customFields)
 	}
 
 	return builder.Build()
