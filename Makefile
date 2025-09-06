@@ -47,13 +47,23 @@ mod-tidy: ## Tidy go modules
 # Run targets
 run: ## Run the example
 	@echo "Running example..."
-	go run ./cmd/main.go
+	@if [ -f .env.local ]; then \
+		echo "Loading environment from .env.local..."; \
+		export $$(cat .env.local | grep -v '^#' | xargs) && go run ./cmd/main.go; \
+	else \
+		echo "No .env.local found, running with default environment..."; \
+		go run ./cmd/main.go; \
+	fi
 
 run-test: ## Run tests and example
 	@echo "Running tests..."
 	$(MAKE) test
 	@echo "Running example..."
 	$(MAKE) run
+
+run-test-mode: ## Run example in test mode (with mock webhook)
+	@echo "Running example in test mode..."
+	@LARK_TEST_MODE=true LARK_WEBHOOK_URL=https://test.webhook.url go run ./cmd/main.go
 
 # Clean targets
 clean: ## Clean build artifacts
