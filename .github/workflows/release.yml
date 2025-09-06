@@ -21,6 +21,9 @@ jobs:
     
     - name: Run tests
       run: go test -v ./src/larklogger/...
+      env:
+        LARK_TEST_MODE: "true"
+        LARK_WEBHOOK_URL: "https://test.webhook.url"
     
     - name: Build
       run: go build -v .

@@ -38,9 +38,15 @@ jobs:
     
     - name: Run tests
       run: go test -v -race -coverprofile=coverage.out ./src/larklogger/...
+      env:
+        LARK_TEST_MODE: "true"
+        LARK_WEBHOOK_URL: "https://test.webhook.url"
     
     - name: Run tests with coverage
       run: go test -v -coverprofile=coverage.out -covermode=atomic ./src/larklogger/...
+      env:
+        LARK_TEST_MODE: "true"
+        LARK_WEBHOOK_URL: "https://test.webhook.url"
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -104,4 +110,7 @@ jobs:
     
     - name: Build example
       run: cd cmd && go build -v .
+      env:
+        LARK_TEST_MODE: "true"
+        LARK_WEBHOOK_URL: "https://test.webhook.url"
 

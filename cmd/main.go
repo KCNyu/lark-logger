@@ -2,15 +2,27 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	larklogger "github.com/KCNyu/lark-logger"
 )
 
 func main() {
+	// Get webhook URL from environment variable
+	webhookURL := larklogger.GetWebhookURL()
+
+	// Check if running in test mode
+	if larklogger.IsTestEnvironment() {
+		log.Println("⚠️  Running in TEST MODE - messages will not be sent to real Lark webhook")
+		log.Printf("Test webhook URL: %s", webhookURL)
+	} else {
+		log.Println("🚀 Running in PRODUCTION MODE - messages will be sent to Lark")
+	}
+
 	// Simplified API: Create logger directly with webhook URL and options
 	logger := larklogger.New(
-		"https://open.feishu.cn/open-apis/bot/v2/hook/a384fb71-c57b-414f-98b4-ce72aaad5073",
+		webhookURL,
 		larklogger.WithTimeout(10*time.Second),
 		larklogger.WithRetry(3, 1*time.Second),
 		larklogger.WithService("api-gateway"),
@@ -45,10 +57,10 @@ func main() {
 	// Note: For text messages, you can still create a separate client if needed
 	// client := larklogger.NewClient(webhookURL, clientOpts...)
 	// err := client.SendText("🚀 Lark Logger Demo - All systems operational!")
-	
+
 	// Or use logger for structured messages
 	logger.Info("🚀 Lark Logger Demo - All systems operational!", map[string]interface{}{
-		"demo": true,
+		"demo":   true,
 		"status": "operational",
 	})
 
@@ -79,7 +91,7 @@ func main() {
 	// if err != nil {
 	//     log.Printf("Failed to send custom card: %v", err)
 	// }
-	
+
 	// Or use logger for structured messages instead
 	logger.Info("System Health Report", map[string]interface{}{
 		"Memory":        "67%",

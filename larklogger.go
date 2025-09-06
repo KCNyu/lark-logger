@@ -139,3 +139,12 @@ func WithHostname(hostname string) LoggerOption {
 func WithTitle(title string) LoggerOption {
 	return larklogger.WithTitle(title)
 }
+
+// Environment configuration functions
+func GetWebhookURL() string {
+	return larklogger.GetWebhookURL()
+}
+
+func IsTestEnvironment() bool {
+	return larklogger.IsTestEnvironment()
+}
