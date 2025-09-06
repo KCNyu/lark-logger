@@ -5,6 +5,12 @@
 *.so
 *.dylib
 
+# Build artifacts
+/cmd/cmd
+/cmd/lark-logger-example
+/example
+/lark-logger
+
 # Test binary, built with `go test -c`
 *.test
 
