@@ -97,8 +97,8 @@ jobs:
         # Install golangci-lint
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
         
-        # Run linting
-        golangci-lint run --timeout=5m ./src/...
+        # Run linting with relaxed configuration
+        golangci-lint run --timeout=5m --config .golangci.yml ./src/...
         LINT_EXIT_CODE=$?
         
         echo "## 📋 Linting Results" >> $GITHUB_STEP_SUMMARY

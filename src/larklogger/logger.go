@@ -146,7 +146,7 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	// Add configuration section only if ShowConfig is enabled
 	if l.opts.ShowConfig {
 		builder.AddDivider()
-		
+
 		// Add configuration section as 2x2 grid with emojis
 		configData := map[string]string{
 			"level":          "📊 Level",
@@ -158,7 +158,7 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 			"hostname":       "🖥️ Hostname",
 			"hostname_value": l.opts.Hostname,
 		}
-		
+
 		// Add config section as 2x2 grid
 		builder.AddConfigGrid(configData)
 	}

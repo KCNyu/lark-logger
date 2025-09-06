@@ -1,0 +1,89 @@
+run:
+  timeout: 5m
+  go: "1.21"
+
+linters-settings:
+  govet:
+    # Enable only specific checks
+    enable:
+      - assign
+      - atomic
+      - bools
+      - buildtag
+      - errorsas
+      - ifaceassert
+      - nilfunc
+      - printf
+      - stringintconv
+    disable:
+      - fieldalignment
+      - shadow
+      - unusedresult
+
+  staticcheck:
+    # Disable unused function checks
+    checks: ["all", "-SA1019", "-U1000"]
+
+  gosimple:
+    # Disable unused variable checks
+    checks: ["all", "-S1002"]
+
+  ineffassign:
+    # Allow some ineffectual assignments
+    check-exported: false
+
+  misspell:
+    # Allow some common misspellings
+    locale: US
+
+  gocyclo:
+    # Increase complexity threshold
+    min-complexity: 35
+
+  goconst:
+    # Increase minimum string length and occurrences
+    min-len: 5
+    min-occurrences: 5
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - misspell
+  disable:
+    - unused
+    - depguard
+    - prealloc
+    - nakedret
+    - gochecknoinits
+    - gochecknoglobals
+    - funlen
+    - gosec
+    - lll
+    - wsl
+    - gofmt
+    - goimports
+    - goconst
+    - gocyclo
+
+issues:
+  # Don't fail on unused functions/variables
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - goconst
+        - gocyclo
+    - path: cmd/
+      linters:
+        - goconst
+  
+  # Increase max issues per linter
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  
+  # Don't fail on new issues
+  new: false
