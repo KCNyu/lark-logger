@@ -72,6 +72,25 @@ func NewLogger(client *Client, opts ...LoggerOption) Logger {
 	return larklogger.NewLarkLogger(client, opts...)
 }
 
+// New creates a new Logger with webhook URL and options (simplified API)
+func New(webhookURL string, opts ...interface{}) Logger {
+	// Separate client and logger options
+	var clientOpts []ClientOption
+	var loggerOpts []LoggerOption
+	
+	for _, opt := range opts {
+		switch o := opt.(type) {
+		case ClientOption:
+			clientOpts = append(clientOpts, o)
+		case LoggerOption:
+			loggerOpts = append(loggerOpts, o)
+		}
+	}
+	
+	client := NewClient(webhookURL, clientOpts...)
+	return NewLogger(client, loggerOpts...)
+}
+
 // NewCardBuilder creates a new card builder
 func NewCardBuilder() *CardBuilder {
 	return larklogger.NewCardBuilder()

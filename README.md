@@ -44,20 +44,20 @@ import (
 )
 
 func main() {
-    // Create Lark client - only webhook URL required
-    client := larklogger.NewClient(
+    // Simplified API: Create logger directly with webhook URL and options
+    logger := larklogger.New(
         "https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url",
         larklogger.WithTimeout(10*time.Second),
         larklogger.WithRetry(3, 1*time.Second),
-    )
-
-    // Create Logger instance - optional service configuration
-    logger := larklogger.NewLogger(client,
         larklogger.WithService("my-service"),
         larklogger.WithEnv("production"),
         larklogger.WithHostname("web-server-01"),
         larklogger.WithTitle("🚀 System Monitor"),
     )
+
+    // Alternative: Traditional two-step approach (still supported)
+    // client := larklogger.NewClient(webhookURL, clientOpts...)
+    // logger := larklogger.NewLogger(client, loggerOpts...)
 
     // Send logs using traditional map format
     logger.Info("API Gateway initialized successfully", map[string]interface{}{

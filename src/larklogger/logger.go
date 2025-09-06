@@ -127,7 +127,7 @@ func (l *LarkLogger) log(level LogLevel, message string, fields map[string]inter
 // buildLogCard builds a Lark card for the log message using enhanced design
 func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[string]interface{}) *Card {
 	emoji := GetLogLevelEmoji(level)
-	template, defaultSubtitle := getVisualConfig(level)
+	template := getVisualConfig(level)
 
 	// Build main title with custom title and emoji
 	mainTitle := fmt.Sprintf("%s %s", emoji, l.opts.Title)
@@ -135,9 +135,8 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	// Create enhanced card builder
 	builder := NewCardBuilder().SetHeader(mainTitle, template)
 
-	// Add subtitle with enhanced message formatting
-	subtitle := fmt.Sprintf("%s • %s", defaultSubtitle, message)
-	builder.AddSubtitle(subtitle)
+	// Add subtitle with message only (no redundant default text)
+	builder.AddSubtitle(message)
 
 	// Add timestamp
 	builder.AddTimestamp()

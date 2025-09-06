@@ -145,16 +145,16 @@ const (
 // -------------------------- Visual Configuration --------------------------
 
 // getVisualConfig returns visual configuration based on log level
-func getVisualConfig(level LogLevel) (template string, defaultSubtitle string) {
+func getVisualConfig(level LogLevel) (template string) {
 	switch level {
 	case LevelInfo:
-		return "blue", "ℹ️ System Status: All services operational"
+		return "blue"
 	case LevelWarn:
-		return "yellow", "⚠️ Alert: Performance degradation detected"
+		return "yellow"
 	case LevelError:
-		return "red", "🚨 Critical: Immediate attention required"
+		return "red"
 	default:
-		return "blue", "📋 System Notification: General update"
+		return "blue"
 	}
 }
 
