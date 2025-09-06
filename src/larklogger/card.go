@@ -570,4 +570,3 @@ func GetLogLevelEmoji(level LogLevel) string {
 		return "📋"
 	}
 }
-

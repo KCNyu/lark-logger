@@ -145,10 +145,10 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 
 	// Prepare KV data
 	kvData := map[string]interface{}{
-		"Level": strings.ToUpper(string(level)),
-		"Service": l.opts.Service,
+		"Level":       strings.ToUpper(string(level)),
+		"Service":     l.opts.Service,
 		"Environment": l.opts.Env,
-		"Hostname": l.opts.Hostname,
+		"Hostname":    l.opts.Hostname,
 	}
 
 	// Add custom fields to KV data
@@ -167,9 +167,6 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 
 	return builder.Build()
 }
-
-
-
 
 // Logger option functions
 func WithService(service string) LoggerOption {
