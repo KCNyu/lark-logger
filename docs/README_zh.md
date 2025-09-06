@@ -27,6 +27,53 @@ go get github.com/KCNyu/lark-logger
 
 ## 🚀 快速开始
 
+### 环境配置
+
+在使用lark-logger之前，需要配置环境变量：
+
+#### 方式1：使用.env文件（推荐）
+
+1. 复制示例环境文件：
+```bash
+cp env.example .env.local
+```
+
+2. 编辑`.env.local`文件，填入您的实际webhook URL：
+```bash
+# 生产环境使用（发送真实消息到Lark）
+LARK_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url
+LARK_TEST_MODE=false
+
+# 测试/开发环境（使用测试webhook，不发送真实消息）
+# LARK_WEBHOOK_URL=https://test.webhook.url
+# LARK_TEST_MODE=true
+```
+
+3. 加载环境变量：
+```bash
+source scripts/load-env.sh
+```
+
+**注意**：`.env.local`文件会被git自动忽略，确保您的webhook URL安全。
+
+#### 方式2：直接导出
+
+```bash
+# 生产环境使用（发送真实消息到Lark）
+export LARK_WEBHOOK_URL="https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url"
+export LARK_TEST_MODE="false"
+
+# 测试/开发环境（使用测试webhook，不发送真实消息）
+export LARK_TEST_MODE="true"
+export LARK_WEBHOOK_URL="https://test.webhook.url"
+```
+
+#### CI/测试配置
+
+对于CI和测试环境，以下环境变量会自动设置：
+- `LARK_TEST_MODE=true`
+- `LARK_WEBHOOK_URL=https://test.webhook.url`
+
 ### 基本使用
 
 ```go
@@ -38,15 +85,11 @@ import (
 )
 
 func main() {
-    // 创建Lark客户端
-    client := larklogger.NewLarkClient(
+    // 简化API：直接使用webhook URL和选项创建logger
+    logger := larklogger.New(
         "https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url",
         larklogger.WithTimeout(10*time.Second),
         larklogger.WithRetry(3, 1*time.Second),
-    )
-
-    // 创建Logger实例
-    logger := larklogger.NewLarkLogger(client,
         larklogger.WithService("my-service"),
         larklogger.WithEnv("production"),
         larklogger.WithHostname("web-server-01"),
