@@ -37,14 +37,14 @@ go get github.com/KCNyu/lark-logger
 
 Before using lark-logger, you need to configure environment variables:
 
-#### Option 1: Using .env file (Recommended)
+#### Option 1: Using .env files (Recommended)
 
 1. Copy the example environment file:
 ```bash
-cp env.example .env
+cp env.example .env.local
 ```
 
-2. Edit `.env` file with your actual webhook URL:
+2. Edit `.env.local` file with your actual webhook URL:
 ```bash
 # For production use (sends real messages to Lark)
 LARK_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url
@@ -59,6 +59,8 @@ LARK_TEST_MODE=false
 ```bash
 source scripts/load-env.sh
 ```
+
+**Note**: `.env.local` files are automatically ignored by git to keep your webhook URLs secure.
 
 #### Option 2: Direct export
 
