@@ -77,7 +77,7 @@ func New(webhookURL string, opts ...interface{}) Logger {
 	// Separate client and logger options
 	var clientOpts []ClientOption
 	var loggerOpts []LoggerOption
-	
+
 	for _, opt := range opts {
 		switch o := opt.(type) {
 		case ClientOption:
@@ -86,7 +86,7 @@ func New(webhookURL string, opts ...interface{}) Logger {
 			loggerOpts = append(loggerOpts, o)
 		}
 	}
-	
+
 	client := NewClient(webhookURL, clientOpts...)
 	return NewLogger(client, loggerOpts...)
 }

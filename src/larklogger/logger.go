@@ -32,11 +32,11 @@ type LarkLogger struct {
 
 // LoggerConfig holds logger configuration
 type LoggerConfig struct {
-	Service      string
-	Env          string
-	Hostname     string
-	Title        string
-	ShowConfig   bool // Whether to show configuration section in logs
+	Service    string
+	Env        string
+	Hostname   string
+	Title      string
+	ShowConfig bool // Whether to show configuration section in logs
 }
 
 // LoggerOption is a function that configures the logger
@@ -155,19 +155,19 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	// Add configuration section only if ShowConfig is enabled
 	if l.opts.ShowConfig {
 		builder.AddDivider()
-		
+
 		// Add configuration section as 2x2 grid with emojis
 		configData := map[string]string{
-			"level":     "📊 Level",
-			"level_value": strings.ToUpper(string(level)),
-			"service":   "🔧 Service", 
-			"service_value": l.opts.Service,
-			"env":       "🌍 Environment",
-			"env_value": l.opts.Env,
-			"hostname":  "🖥️ Hostname",
+			"level":          "📊 Level",
+			"level_value":    strings.ToUpper(string(level)),
+			"service":        "🔧 Service",
+			"service_value":  l.opts.Service,
+			"env":            "🌍 Environment",
+			"env_value":      l.opts.Env,
+			"hostname":       "🖥️ Hostname",
 			"hostname_value": l.opts.Hostname,
 		}
-		
+
 		// Add config section as 2x2 grid
 		builder.AddConfigGrid(configData)
 	}

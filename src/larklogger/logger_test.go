@@ -126,8 +126,8 @@ func TestLarkLoggerBuildLogCard(t *testing.T) {
 		if !contains(card.Card.Header.Title.Content, "System Log") {
 			t.Error("Expected title to contain System Log")
 		}
-		if card.Card.Header.Template != "yellow" {
-			t.Errorf("Expected template 'yellow', got %s", card.Card.Header.Template)
+		if card.Card.Header.Template != "orange" {
+			t.Errorf("Expected template 'orange', got %s", card.Card.Header.Template)
 		}
 	})
 }

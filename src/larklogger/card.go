@@ -403,7 +403,10 @@ func (cb *CardBuilder) AddDivider() *CardBuilder {
 
 // AddKVTable adds professional KV table with alternating colors
 func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
-	// Add table header
+	// Add section title with emoji
+	cb.AddSection("📊 **Data Fields**")
+	
+	// Add table header with enhanced styling
 	headerColumns := []Column{
 		{
 			Tag:           "column",
@@ -413,7 +416,7 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 			Elements: []ColumnElement{
 				{
 					Tag:       "markdown",
-					Content:   "**Key**",
+					Content:   "🔑 **Key**",
 					TextAlign: "left",
 					FontSize:  FontSizeLarge,
 				},
@@ -427,7 +430,7 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 			Elements: []ColumnElement{
 				{
 					Tag:       "markdown",
-					Content:   "**Value**",
+					Content:   "💎 **Value**",
 					TextAlign: "left",
 					FontSize:  FontSizeLarge,
 				},
@@ -438,7 +441,7 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 		Tag:             "column_set",
 		Columns:         headerColumns,
 		FlexMode:        "none",
-		BackgroundStyle: BgStyleHeader,
+		BackgroundStyle: "grey",
 		Padding: &Padding{
 			Top:    PaddingTop,
 			Bottom: PaddingBottom,
@@ -447,13 +450,16 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 		},
 	})
 
-	// Add data rows
+	// Add data rows with enhanced styling
 	for i, kv := range kvList {
-		// Alternating background colors
-		bgStyle := BgStyleOdd
+		// Enhanced alternating background colors
+		bgStyle := "default"
 		if i%2 == 1 {
-			bgStyle = BgStyleEven
+			bgStyle = "light"
 		}
+
+		// Get emoji for key type
+		keyEmoji := getKeyEmoji(kv.Key)
 
 		dataColumns := []Column{
 			{
@@ -464,7 +470,7 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 				Elements: []ColumnElement{
 					{
 						Tag:       "markdown",
-						Content:   fmt.Sprintf("**%s**", escapeMarkdown(kv.Key)),
+						Content:   fmt.Sprintf("%s **%s**", keyEmoji, escapeMarkdown(kv.Key)),
 						TextAlign: "left",
 					},
 				},
@@ -477,7 +483,7 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 				Elements: []ColumnElement{
 					{
 						Tag:       "markdown",
-						Content:   kv.Value,
+						Content:   fmt.Sprintf("`%s`", kv.Value),
 						TextAlign: "left",
 						FontSize:  FontSizeDefault,
 					},
