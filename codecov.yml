@@ -1,0 +1,29 @@
+# Codecov configuration for lark-logger
+# This helps optimize coverage reporting and reduce rate limits
+
+coverage:
+  status:
+    project:
+      default:
+        target: 80%  # Set coverage target
+        threshold: 1%  # Allow 1% decrease
+    patch:
+      default:
+        target: 70%  # Patch coverage target
+        threshold: 1%
+
+# Reduce upload frequency to avoid rate limits
+comment:
+  layout: "header,diff,files,footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+# Optimize for smaller projects
+github_checks:
+  annotations: true
+
+# Reduce verbosity to minimize API calls
+codecov:
+  require_ci_to_pass: yes

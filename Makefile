@@ -27,6 +27,10 @@ test-coverage: ## Run tests with coverage
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
 
+coverage-local: ## Generate local coverage report (alternative to Codecov)
+	@echo "Generating local coverage report..."
+	@./scripts/coverage-report.sh
+
 # Code quality targets
 lint: ## Run linter
 	@echo "Running linter..."
