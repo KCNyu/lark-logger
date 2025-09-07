@@ -49,6 +49,9 @@ type CardBuilder = larklogger.CardBuilder
 // KVItem represents a prioritized key-value item
 type KVItem = larklogger.KVItem
 
+// Button represents a button configuration
+type Button = larklogger.Button
+
 // Client options
 type ClientOption = larklogger.ClientOption
 
@@ -60,6 +63,13 @@ const (
 	LevelInfo  = larklogger.LevelInfo
 	LevelWarn  = larklogger.LevelWarn
 	LevelError = larklogger.LevelError
+)
+
+// Button styles
+const (
+	ButtonStylePrimary   = larklogger.ButtonStylePrimary
+	ButtonStyleSecondary = larklogger.ButtonStyleSecondary
+	ButtonStyleDanger    = larklogger.ButtonStyleDanger
 )
 
 // NewClient creates a new Lark client
@@ -142,6 +152,10 @@ func WithTitle(title string) LoggerOption {
 
 func WithShowConfig(show bool) LoggerOption {
 	return larklogger.WithShowConfig(show)
+}
+
+func WithButtons(buttons []Button) LoggerOption {
+	return larklogger.WithButtons(buttons)
 }
 
 // Environment configuration functions

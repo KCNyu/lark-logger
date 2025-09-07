@@ -55,6 +55,44 @@ func main() {
 		"status":  "enabled",
 	})
 
+	// Create a logger with buttons for action items
+	buttonLogger := larklogger.New(
+		webhookURL,
+		larklogger.WithService("action-demo"),
+		larklogger.WithEnv("production"),
+		larklogger.WithHostname("server-01"),
+		larklogger.WithTitle("Action Required"),
+		larklogger.WithShowConfig(true),
+		larklogger.WithButtons([]larklogger.Button{
+			{
+				Text:  "View Logs",
+				URL:   "https://logs.example.com/system/error-123",
+				Style: larklogger.ButtonStylePrimary,
+			},
+			{
+				Text:    "Restart Service",
+				URL:     "https://ops.example.com/restart/service-abc",
+				Style:   larklogger.ButtonStyleSecondary,
+				Confirm: true,
+			},
+			{
+				Text:    "Escalate Issue",
+				URL:     "https://ops.example.com/escalate/incident-456",
+				Style:   larklogger.ButtonStyleDanger,
+				Confirm: true,
+			},
+		}),
+	)
+
+	// This will show buttons for user actions
+	buttonLogger.Error("Critical system error detected", map[string]interface{}{
+		"error_code": "SYS_001",
+		"component":  "database",
+		"severity":   "critical",
+		"timestamp":  "2024-01-15T10:30:00Z",
+		"details":    "Connection pool exhausted, unable to process requests",
+	})
+
 	// Send logs using new Infof/Warnf/Errorf format (simplified)
 	logger.Infof("Service health check", "status", "healthy", "response_time", "120ms", "uptime", "2h30m")
 	logger.Warnf("Memory usage approaching threshold", "usage", "87%", "threshold", "85%", "recommendation", "consider horizontal scaling")

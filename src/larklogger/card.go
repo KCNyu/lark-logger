@@ -7,22 +7,7 @@ import (
 	"time"
 )
 
-// Emoji constants
-const (
-	EmojiInfo    = "ℹ️"
-	EmojiWarn    = "⚠️"
-	EmojiError   = "❌"
-	EmojiDefault = "📋"
-)
-
-// Color constants
-const (
-	ColorBlue   = "blue"
-	ColorGreen  = "green"
-	ColorOrange = "orange"
-	ColorRed    = "red"
-	ColorGrey   = "grey"
-)
+// Note: Constants moved to constants.go for better organization
 
 // Card represents a Lark interactive card
 type Card struct {
@@ -72,10 +57,40 @@ type Element struct {
 	Tag             string   `json:"tag"`
 	Text            *Text    `json:"text,omitempty"`
 	Columns         []Column `json:"columns,omitempty"`
+	Actions         []Action `json:"actions,omitempty"`
 	FlexMode        string   `json:"flex_mode,omitempty"`
 	BackgroundStyle string   `json:"background_style,omitempty"`
 	Padding         *Padding `json:"padding,omitempty"`
 	TextAlign       string   `json:"text_align,omitempty"`
+}
+
+// Action represents button action
+type Action struct {
+	Tag     string       `json:"tag"`
+	Text    *Text        `json:"text,omitempty"`
+	URL     string       `json:"url,omitempty"`
+	Type    string       `json:"type,omitempty"`
+	Value   *ActionValue `json:"value,omitempty"`
+	Confirm *Confirm     `json:"confirm,omitempty"`
+}
+
+// ActionValue represents action value
+type ActionValue struct {
+	Key string `json:"key,omitempty"`
+}
+
+// Confirm represents confirmation dialog
+type Confirm struct {
+	Title *Text `json:"title,omitempty"`
+	Text  *Text `json:"text,omitempty"`
+}
+
+// Button represents a button configuration
+type Button struct {
+	Text    string `json:"text"`
+	URL     string `json:"url,omitempty"`
+	Style   string `json:"style,omitempty"`
+	Confirm bool   `json:"confirm,omitempty"`
 }
 
 // Padding represents padding structure
@@ -134,24 +149,9 @@ type CardSection struct {
 	Fields []*CardText `json:"fields,omitempty"`
 }
 
-// -------------------------- Visual Constants --------------------------
-
+// Note: Constants moved to constants.go for better organization
+// Background styles
 const (
-	// Corner radius (px)
-	CornerRadius = 8
-	// Padding (px): top/bottom 8, left/right 12
-	PaddingTop        = 8
-	PaddingBottom     = 8
-	PaddingLeft       = 12
-	PaddingRight      = 12
-	ColumnWeightKey   = 3
-	ColumnWeightValue = 7
-	// Font sizes
-	FontSizeDefault = "default"
-	FontSizeLarge   = "large"
-	// Line height
-	LineHeight = "1.5"
-	// Background styles
 	BgStyleHeader = "grey"    // Header: light grey
 	BgStyleOdd    = "default" // Odd rows: white
 	BgStyleEven   = "light"   // Even rows: very light grey
@@ -185,7 +185,7 @@ func getLogLevelEmoji(level LogLevel) string {
 	}
 }
 
-// getKeyEmoji returns emoji for key type
+// getKeyEmoji returns minimal emoji for key type (simplified for cleaner display)
 func getKeyEmoji(key string) string {
 	keyLower := strings.ToLower(key)
 
@@ -196,34 +196,8 @@ func getKeyEmoji(key string) string {
 		return EmojiWarn
 	case strings.Contains(keyLower, "success") || strings.Contains(keyLower, "ok"):
 		return "✅"
-	case strings.Contains(keyLower, "time") || strings.Contains(keyLower, "duration"):
-		return "⏱️"
-	case strings.Contains(keyLower, "memory") || strings.Contains(keyLower, "ram"):
-		return "💾"
-	case strings.Contains(keyLower, "cpu") || strings.Contains(keyLower, "processor"):
-		return "🖥️"
-	case strings.Contains(keyLower, "network") || strings.Contains(keyLower, "connection"):
-		return "🌐"
-	case strings.Contains(keyLower, "database") || strings.Contains(keyLower, "db"):
-		return "🗄️"
-	case strings.Contains(keyLower, "user") || strings.Contains(keyLower, "client"):
-		return "👤"
-	case strings.Contains(keyLower, "request") || strings.Contains(keyLower, "api"):
-		return "📡"
-	case strings.Contains(keyLower, "file") || strings.Contains(keyLower, "path"):
-		return "📁"
-	case strings.Contains(keyLower, "port") || strings.Contains(keyLower, "address"):
-		return "🔌"
-	case strings.Contains(keyLower, "version") || strings.Contains(keyLower, "v"):
-		return "🏷️"
-	case strings.Contains(keyLower, "count") || strings.Contains(keyLower, "number"):
-		return "🔢"
-	case strings.Contains(keyLower, "size") || strings.Contains(keyLower, "length"):
-		return "📏"
-	case strings.Contains(keyLower, "status") || strings.Contains(keyLower, "state"):
-		return "📊"
 	default:
-		return EmojiDefault
+		return "" // No emoji for most fields to reduce visual clutter
 	}
 }
 
@@ -281,25 +255,125 @@ func formatValue(v interface{}) string {
 		}
 	}
 
-	// Escape special characters to avoid format breaking
-	return escapeMarkdown(valueStr)
+	// Format long strings for better mobile display
+	return formatLongString(valueStr)
 }
 
-// escapeMarkdown escapes Lark Markdown special characters
+// formatLongString formats long strings for better mobile display
+func formatLongString(value string) string {
+	if value == "" {
+		return "-"
+	}
+
+	// First escape necessary characters
+	escaped := escapeMarkdown(value)
+
+	// Handle JSON strings specially
+	if strings.HasPrefix(escaped, "{") && strings.HasSuffix(escaped, "}") ||
+		strings.HasPrefix(escaped, "[") && strings.HasSuffix(escaped, "]") {
+		return formatJSONString(escaped)
+	}
+
+	// Handle very long strings
+	if len(escaped) > 100 {
+		return formatLongTextString(escaped)
+	}
+
+	return escaped
+}
+
+// formatJSONString formats JSON for better readability
+func formatJSONString(jsonStr string) string {
+	// For mobile, truncate very long JSON and add length hint, no code fences
+	if len(jsonStr) > 200 {
+		truncated := jsonStr[:150]
+		if lastComma := strings.LastIndex(truncated, ","); lastComma > 50 {
+			truncated = jsonStr[:lastComma]
+		}
+		return truncated + "\n... (" + fmt.Sprintf("%d", len(jsonStr)) + " chars)"
+	}
+	// For shorter JSON, return as-is (plain text)
+	return jsonStr
+}
+
+// formatLongTextString formats long text strings
+func formatLongTextString(text string) string {
+	// Break long strings into multiple lines for mobile readability
+	if len(text) > 100 {
+		// Insert line breaks at word boundaries
+		words := strings.Fields(text)
+		var lines []string
+		var currentLine string
+
+		for _, word := range words {
+			if len(currentLine)+len(word)+1 > 50 { // 50 chars per line for mobile
+				if currentLine != "" {
+					lines = append(lines, currentLine)
+					currentLine = word
+				} else {
+					// Word itself is too long, break it
+					for len(word) > 50 {
+						lines = append(lines, word[:50])
+						word = word[50:]
+					}
+					currentLine = word
+				}
+			} else {
+				if currentLine == "" {
+					currentLine = word
+				} else {
+					currentLine += " " + word
+				}
+			}
+		}
+
+		if currentLine != "" {
+			lines = append(lines, currentLine)
+		}
+
+		return strings.Join(lines, "\n")
+	}
+
+	return text
+}
+
+// toNonBreaking converts common break chars to non-breaking ones for no-wrap display
+func toNonBreaking(s string) string {
+	if s == "" {
+		return s
+	}
+	r := strings.ReplaceAll(s, " ", "\u00a0") // space -> NBSP
+	r = strings.ReplaceAll(r, "-", "\u2011")  // hyphen -> non-breaking hyphen
+	r = strings.ReplaceAll(r, "/", "\u2215")  // slash -> division slash
+	return r
+}
+
+// shouldStackKV decides if a KV item should switch to vertical block layout
+func shouldStackKV(value string) bool {
+	if value == "" {
+		return false
+	}
+	if len(value) > 80 {
+		return true
+	}
+	if strings.HasPrefix(value, "{") || strings.HasPrefix(value, "[") {
+		return true
+	}
+	if strings.Contains(value, "\n") {
+		return true
+	}
+	return false
+}
+
+// escapeMarkdown escapes only necessary characters, preserving markdown formatting
 func escapeMarkdown(content string) string {
 	if content == "" {
 		return "-"
 	}
 
-	// Simple escape for common markdown characters
+	// Only escape characters that could break the card structure
+	// Preserve markdown formatting like ** for bold and ` for code
 	replacer := strings.NewReplacer(
-		"*", "\\*",
-		"_", "\\_",
-		"`", "\\`",
-		"[", "\\[",
-		"]", "\\]",
-		"(", "\\(",
-		")", "\\)",
 		"<", "&lt;",
 		">", "&gt;",
 		"&", "&amp;",
@@ -309,7 +383,8 @@ func escapeMarkdown(content string) string {
 
 // CardBuilder helps build Lark cards
 type CardBuilder struct {
-	card *Card
+	card     *Card
+	isMobile bool // Flag for mobile optimization
 }
 
 // NewCardBuilder creates a new card builder
@@ -332,7 +407,47 @@ func NewCardBuilder() *CardBuilder {
 				CornerRadius: CornerRadius,
 			},
 		},
+		isMobile: false, // Default to desktop
 	}
+}
+
+// NewMobileCardBuilder creates a mobile-optimized card builder
+func NewMobileCardBuilder() *CardBuilder {
+	cb := NewCardBuilder()
+	cb.isMobile = true
+	return cb
+}
+
+// SetMobileOptimization enables/disables mobile optimization
+func (cb *CardBuilder) SetMobileOptimization(mobile bool) *CardBuilder {
+	cb.isMobile = mobile
+	return cb
+}
+
+// getPadding returns appropriate padding based on device type
+func (cb *CardBuilder) getPadding() *Padding {
+	if cb.isMobile {
+		return &Padding{
+			Top:    MobilePaddingTop,
+			Bottom: MobilePaddingBottom,
+			Left:   MobilePaddingLeft,
+			Right:  MobilePaddingRight,
+		}
+	}
+	return &Padding{
+		Top:    PaddingTop,
+		Bottom: PaddingBottom,
+		Left:   PaddingLeft,
+		Right:  PaddingRight,
+	}
+}
+
+// getLineHeight returns appropriate line height based on device type
+func (cb *CardBuilder) getLineHeight() string {
+	if cb.isMobile {
+		return MobileLineHeight
+	}
+	return LineHeight
 }
 
 // SetHeader sets the card header
@@ -350,19 +465,33 @@ func (cb *CardBuilder) SetHeader(title, template string) *CardBuilder {
 
 // AddSection adds a text section
 func (cb *CardBuilder) AddSection(content string) *CardBuilder {
+	// Use mobile-optimized padding if mobile flag is set
+	padding := &Padding{
+		Top:    PaddingTop,
+		Bottom: PaddingBottom,
+		Left:   PaddingLeft,
+		Right:  PaddingRight,
+	}
+
+	lineHeight := LineHeight
+	if cb.isMobile {
+		padding = &Padding{
+			Top:    MobilePaddingTop,
+			Bottom: MobilePaddingBottom,
+			Left:   MobilePaddingLeft,
+			Right:  MobilePaddingRight,
+		}
+		lineHeight = MobileLineHeight
+	}
+
 	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
 		Tag: "div",
 		Text: &Text{
 			Tag:        "lark_md",
 			Content:    escapeMarkdown(content),
-			LineHeight: LineHeight,
+			LineHeight: lineHeight,
 		},
-		Padding: &Padding{
-			Top:    PaddingTop,
-			Bottom: PaddingBottom,
-			Left:   PaddingLeft,
-			Right:  PaddingRight,
-		},
+		Padding:   padding,
 		TextAlign: "left",
 	})
 	return cb
@@ -370,19 +499,33 @@ func (cb *CardBuilder) AddSection(content string) *CardBuilder {
 
 // AddSubtitle adds subtitle with message
 func (cb *CardBuilder) AddSubtitle(subtitle string) *CardBuilder {
+	// Use mobile-optimized padding if mobile flag is set
+	padding := &Padding{
+		Top:    PaddingTop,
+		Bottom: 0,
+		Left:   PaddingLeft,
+		Right:  PaddingRight,
+	}
+
+	lineHeight := LineHeight
+	if cb.isMobile {
+		padding = &Padding{
+			Top:    MobilePaddingTop,
+			Bottom: 0,
+			Left:   MobilePaddingLeft,
+			Right:  MobilePaddingRight,
+		}
+		lineHeight = MobileLineHeight
+	}
+
 	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
 		Tag: "div",
 		Text: &Text{
 			Tag:        "lark_md",
 			Content:    fmt.Sprintf("<font color=\"grey\">%s</font>", escapeMarkdown(subtitle)),
-			LineHeight: LineHeight,
+			LineHeight: lineHeight,
 		},
-		Padding: &Padding{
-			Top:    PaddingTop,
-			Bottom: 0,
-			Left:   PaddingLeft,
-			Right:  PaddingRight,
-		},
+		Padding:   padding,
 		TextAlign: "left",
 	})
 	return cb
@@ -390,20 +533,37 @@ func (cb *CardBuilder) AddSubtitle(subtitle string) *CardBuilder {
 
 // AddTimestamp adds timestamp (right-aligned)
 func (cb *CardBuilder) AddTimestamp() *CardBuilder {
+	// Use mobile-optimized padding if mobile flag is set
+	padding := &Padding{
+		Top:    0,
+		Bottom: PaddingBottom,
+		Left:   PaddingLeft,
+		Right:  PaddingRight,
+	}
+
+	lineHeight := LineHeight
+	textAlign := "right"
+
+	if cb.isMobile {
+		padding = &Padding{
+			Top:    0,
+			Bottom: MobilePaddingBottom,
+			Left:   MobilePaddingLeft,
+			Right:  MobilePaddingRight,
+		}
+		lineHeight = MobileLineHeight
+		textAlign = "left" // Left align on mobile for better readability
+	}
+
 	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
 		Tag: "div",
 		Text: &Text{
 			Tag:        "lark_md",
-			Content:    fmt.Sprintf("<font color=\"grey\">⏰ %s</font>", time.Now().Format("2006-01-02 15:04:05")),
-			LineHeight: LineHeight,
+			Content:    fmt.Sprintf("<font color=\"grey\">%s %s</font>", EmojiTime, time.Now().Format("2006-01-02 15:04:05")),
+			LineHeight: lineHeight,
 		},
-		Padding: &Padding{
-			Top:    0,
-			Bottom: PaddingBottom,
-			Left:   PaddingLeft,
-			Right:  PaddingRight,
-		},
-		TextAlign: "right",
+		Padding:   padding,
+		TextAlign: textAlign,
 	})
 	return cb
 }
@@ -416,73 +576,40 @@ func (cb *CardBuilder) AddDivider() *CardBuilder {
 
 // AddKVTable adds professional KV table with alternating colors
 func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
-	// Add section title
-	cb.AddSection("📊 Data Fields")
-
-	// Add table header with enhanced styling
-	headerColumns := []Column{
-		{
-			Tag:           "column",
-			Width:         "weighted",
-			Weight:        ColumnWeightKey,
-			VerticalAlign: "middle",
-			Elements: []ColumnElement{
-				{
-					Tag:       "markdown",
-					Content:   "🔑 **Key**",
-					TextAlign: "left",
-					FontSize:  FontSizeLarge,
-				},
-			},
-		},
-		{
-			Tag:           "column",
-			Width:         "weighted",
-			Weight:        ColumnWeightValue,
-			VerticalAlign: "middle",
-			Elements: []ColumnElement{
-				{
-					Tag:       "markdown",
-					Content:   "💎 **Value**",
-					TextAlign: "left",
-					FontSize:  FontSizeLarge,
-				},
-			},
-		},
-	}
+	// Add section title with emoji, bold formatting and center alignment
 	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
-		Tag:             "column_set",
-		Columns:         headerColumns,
-		FlexMode:        "none",
-		BackgroundStyle: "grey",
-		Padding: &Padding{
-			Top:    PaddingTop,
-			Bottom: PaddingBottom,
-			Left:   PaddingLeft,
-			Right:  PaddingRight,
+		Tag: "div",
+		Text: &Text{
+			Tag:        "lark_md",
+			Content:    "📊 **Data Fields**",
+			LineHeight: cb.getLineHeight(),
 		},
+		Padding:   cb.getPadding(),
+		TextAlign: "center", // Center align for better visual hierarchy
 	})
 
-	// Add data rows with enhanced styling
-	for i, kv := range kvList {
-		// Enhanced alternating background colors
-		bgStyle := "default"
-		if i%2 == 1 {
-			bgStyle = "light"
+	// Split into short and long groups
+	var shortItems []KVItem
+	var longItems []KVItem
+	for _, kv := range kvList {
+		if shouldStackKV(kv.Value) {
+			longItems = append(longItems, kv)
+		} else {
+			shortItems = append(shortItems, kv)
 		}
+	}
 
-		dataColumns := []Column{
+	// Render short items as table (two-column rows)
+	if len(shortItems) > 0 {
+		// Add table header with clean styling (no emojis), edge-to-edge
+		headerColumns := []Column{
 			{
 				Tag:           "column",
 				Width:         "weighted",
 				Weight:        ColumnWeightKey,
 				VerticalAlign: "middle",
 				Elements: []ColumnElement{
-					{
-						Tag:       "markdown",
-						Content:   fmt.Sprintf("**%s**", kv.Key),
-						TextAlign: "left",
-					},
+					{Tag: "markdown", Content: "**Key**", TextAlign: "left", FontSize: FontSizeLarge},
 				},
 			},
 			{
@@ -491,29 +618,172 @@ func (cb *CardBuilder) AddKVTable(kvList []KVItem) *CardBuilder {
 				Weight:        ColumnWeightValue,
 				VerticalAlign: "middle",
 				Elements: []ColumnElement{
-					{
-						Tag:       "markdown",
-						Content:   kv.Value,
-						TextAlign: "left",
-						FontSize:  FontSizeDefault,
-					},
+					{Tag: "markdown", Content: "**Value**", TextAlign: "left", FontSize: FontSizeLarge},
 				},
 			},
 		}
-
 		cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
 			Tag:             "column_set",
-			Columns:         dataColumns,
+			Columns:         headerColumns,
 			FlexMode:        "none",
-			BackgroundStyle: bgStyle,
-			Padding: &Padding{
-				Top:    PaddingTop,
-				Bottom: PaddingBottom,
-				Left:   PaddingLeft,
-				Right:  PaddingRight,
-			},
+			BackgroundStyle: "grey",
+			Padding:         &Padding{Top: PaddingTop, Bottom: PaddingBottom, Left: 0, Right: 0},
 		})
+
+		// Rows
+		for i, kv := range shortItems {
+			bgStyle := "default"
+			if i%2 == 1 {
+				bgStyle = "light"
+			}
+			keyNoWrap := toNonBreaking(kv.Key)
+			valueDisplay := kv.Value
+			row := []Column{
+				{Tag: "column", Width: "weighted", Weight: ColumnWeightKey, VerticalAlign: "top", Elements: []ColumnElement{{Tag: "markdown", Content: "**" + keyNoWrap + "**", TextAlign: "left", FontSize: FontSizeDefault}}},
+				{Tag: "column", Width: "weighted", Weight: ColumnWeightValue, VerticalAlign: "top", Elements: []ColumnElement{{Tag: "markdown", Content: valueDisplay, TextAlign: "left", FontSize: FontSizeDefault}}},
+			}
+			cb.card.Card.Elements = append(cb.card.Card.Elements, Element{Tag: "column_set", Columns: row, FlexMode: "none", BackgroundStyle: bgStyle, Padding: &Padding{Top: PaddingTop / 2, Bottom: PaddingBottom / 2, Left: 0, Right: 0}})
+		}
 	}
+
+	// Render long items as a separate block
+	if len(longItems) > 0 {
+		cb.AddDivider()
+		for _, kv := range longItems {
+			keyNoWrap := toNonBreaking(kv.Key)
+			cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
+				Tag:       "div",
+				Text:      &Text{Tag: "lark_md", Content: "**" + keyNoWrap + "**\n" + kv.Value, LineHeight: cb.getLineHeight()},
+				Padding:   &Padding{Top: PaddingTop / 2, Bottom: PaddingBottom / 2, Left: 0, Right: 0},
+				TextAlign: "left",
+			})
+		}
+	}
+
+	return cb
+}
+
+// AddConfigGrid adds a compact 2x2 configuration grid
+func (cb *CardBuilder) AddConfigGrid(configData map[string]string) *CardBuilder {
+	// Cross layout: two columns; labels row then values row for each pair group
+	compact := &Padding{Top: 2, Bottom: 2, Left: 0, Right: 0}
+
+	// Row 1: labels (Level, Service)
+	rowLabels1 := []Column{
+		{ // Level label
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   fmt.Sprintf("**%s %s:**", "📊", toNonBreaking("Level")),
+				TextAlign: "left",
+				FontSize:  FontSizeSmall,
+			}},
+		},
+		{ // Service label
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   fmt.Sprintf("**%s %s:**", "🔧", toNonBreaking("Service")),
+				TextAlign: "left",
+				FontSize:  FontSizeSmall,
+			}},
+		},
+	}
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{Tag: "column_set", Columns: rowLabels1, FlexMode: "none", BackgroundStyle: ColorLightBlue, Padding: compact})
+
+	// Row 2: values (Level value, Service value)
+	rowValues1 := []Column{
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   configData["level_value"],
+				TextAlign: "left",
+				FontSize:  FontSizeDefault,
+			}},
+		},
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   configData["service_value"],
+				TextAlign: "left",
+				FontSize:  FontSizeDefault,
+			}},
+		},
+	}
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{Tag: "column_set", Columns: rowValues1, FlexMode: "none", BackgroundStyle: ColorLightBlue, Padding: compact})
+
+	// Row 3: labels (Env, Hostname)
+	rowLabels2 := []Column{
+		{ // Env label
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   fmt.Sprintf("**%s %s:**", "🌍", toNonBreaking("Env")),
+				TextAlign: "left",
+				FontSize:  FontSizeSmall,
+			}},
+		},
+		{ // Hostname label
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   fmt.Sprintf("**%s %s:**", "🖥️", toNonBreaking("Hostname")),
+				TextAlign: "left",
+				FontSize:  FontSizeSmall,
+			}},
+		},
+	}
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{Tag: "column_set", Columns: rowLabels2, FlexMode: "none", BackgroundStyle: ColorLightBlue, Padding: compact})
+
+	// Row 4: values (Env value, Hostname value)
+	rowValues2 := []Column{
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   configData["env_value"],
+				TextAlign: "left",
+				FontSize:  FontSizeDefault,
+			}},
+		},
+		{
+			Tag:           "column",
+			Width:         "weighted",
+			Weight:        1,
+			VerticalAlign: "top",
+			Elements: []ColumnElement{{
+				Tag:       "markdown",
+				Content:   configData["hostname_value"],
+				TextAlign: "left",
+				FontSize:  FontSizeDefault,
+			}},
+		},
+	}
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{Tag: "column_set", Columns: rowValues2, FlexMode: "none", BackgroundStyle: ColorLightBlue, Padding: compact})
+
 	return cb
 }
 
@@ -618,102 +888,6 @@ func (cb *CardBuilder) AddKVTableWithStyle(kvList []KVItem, bgStyle string) *Car
 	return cb
 }
 
-// AddConfigGrid adds a 2x2 configuration grid with emojis
-func (cb *CardBuilder) AddConfigGrid(config map[string]string) *CardBuilder {
-	// Create 2x2 grid layout
-	gridColumns := []Column{
-		{
-			Tag:           "column",
-			Width:         "weighted",
-			Weight:        1,
-			VerticalAlign: "middle",
-			Elements: []ColumnElement{
-				{
-					Tag:       "markdown",
-					Content:   fmt.Sprintf("**%s**\n%s", config["level"], config["level_value"]),
-					TextAlign: "center",
-					FontSize:  FontSizeDefault,
-				},
-			},
-		},
-		{
-			Tag:           "column",
-			Width:         "weighted",
-			Weight:        1,
-			VerticalAlign: "middle",
-			Elements: []ColumnElement{
-				{
-					Tag:       "markdown",
-					Content:   fmt.Sprintf("**%s**\n%s", config["service"], config["service_value"]),
-					TextAlign: "center",
-					FontSize:  FontSizeDefault,
-				},
-			},
-		},
-	}
-
-	// First row
-	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
-		Tag:             "column_set",
-		Columns:         gridColumns,
-		FlexMode:        "none",
-		BackgroundStyle: "light_blue",
-		Padding: &Padding{
-			Top:    PaddingTop,
-			Bottom: PaddingBottom,
-			Left:   PaddingLeft,
-			Right:  PaddingRight,
-		},
-	})
-
-	// Second row
-	gridColumns2 := []Column{
-		{
-			Tag:           "column",
-			Width:         "weighted",
-			Weight:        1,
-			VerticalAlign: "middle",
-			Elements: []ColumnElement{
-				{
-					Tag:       "markdown",
-					Content:   fmt.Sprintf("**%s**\n%s", config["env"], config["env_value"]),
-					TextAlign: "center",
-					FontSize:  FontSizeDefault,
-				},
-			},
-		},
-		{
-			Tag:           "column",
-			Width:         "weighted",
-			Weight:        1,
-			VerticalAlign: "middle",
-			Elements: []ColumnElement{
-				{
-					Tag:       "markdown",
-					Content:   fmt.Sprintf("**%s**\n%s", config["hostname"], config["hostname_value"]),
-					TextAlign: "center",
-					FontSize:  FontSizeDefault,
-				},
-			},
-		},
-	}
-
-	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
-		Tag:             "column_set",
-		Columns:         gridColumns2,
-		FlexMode:        "none",
-		BackgroundStyle: "light_blue",
-		Padding: &Padding{
-			Top:    PaddingTop,
-			Bottom: PaddingBottom,
-			Left:   PaddingLeft,
-			Right:  PaddingRight,
-		},
-	})
-
-	return cb
-}
-
 // AddKeyValueList adds a key-value list section
 func (cb *CardBuilder) AddKeyValueList(title string, kv map[string]interface{}) *CardBuilder {
 	cb.AddSection(fmt.Sprintf("**%s**", title))
@@ -790,6 +964,66 @@ func (cb *CardBuilder) AddCardLink(url string) *CardBuilder {
 		})
 	}
 	return cb
+}
+
+// AddButtons adds action buttons to the card
+func (cb *CardBuilder) AddButtons(buttons []Button) *CardBuilder {
+	if len(buttons) == 0 {
+		return cb
+	}
+
+	var actions []Action
+	for _, button := range buttons {
+		action := Action{
+			Tag:  "button",
+			Text: &Text{Tag: "plain_text", Content: button.Text},
+			Type: "url",
+			URL:  button.URL,
+		}
+
+		// Set button style with enhanced colors for confirm actions
+		if button.Style != "" {
+			action.Type = button.Style
+		}
+
+		// Use danger style for confirm buttons to indicate caution
+		if button.Confirm {
+			action.Type = ButtonStyleDanger
+			action.Confirm = &Confirm{
+				Title: &Text{Tag: "plain_text", Content: "⚠️ Confirm Action"},
+				Text:  &Text{Tag: "plain_text", Content: fmt.Sprintf("Are you sure you want to execute %s?\n\nThis action cannot be undone.", button.Text)},
+			}
+		} else if button.Style == ButtonStylePrimary {
+			action.Type = ButtonStylePrimary
+		} else {
+			action.Type = ButtonStyleSecondary
+		}
+
+		actions = append(actions, action)
+	}
+
+	cb.card.Card.Elements = append(cb.card.Card.Elements, Element{
+		Tag:     "action",
+		Actions: actions,
+	})
+
+	return cb
+}
+
+// AddButton adds a single button to the card
+func (cb *CardBuilder) AddButton(text, url string, style ...string) *CardBuilder {
+	buttonStyle := ButtonStyleSecondary
+	if len(style) > 0 {
+		buttonStyle = style[0]
+	}
+
+	button := Button{
+		Text:  text,
+		URL:   url,
+		Style: buttonStyle,
+	}
+
+	return cb.AddButtons([]Button{button})
 }
 
 // Build builds the card
