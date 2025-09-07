@@ -1,16 +1,23 @@
-# lark-logger
+# 🚀 lark-logger
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/KCNyu/lark-logger.svg)](https://pkg.go.dev/github.com/KCNyu/lark-logger)
+[![Go Report Card](https://goreportcard.com/badge/github.com/KCNyu/lark-logger)](https://goreportcard.com/report/github.com/KCNyu/lark-logger)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/KCNyu/lark-logger)](https://github.com/KCNyu/lark-logger/stargazers)
+[![Go Version](https://img.shields.io/badge/go-%3E%3D%201.19-blue)](https://go.dev/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/KCNyu/lark-logger/pulls)
 
 [English](../README.md) | 中文文档
 
-一个简洁的 Go SDK，用于通过 Lark（飞书）Webhook 发送结构化日志，卡片样式清晰、移动端友好。
+🎯 一个简洁的 Go SDK，用于通过 Lark（飞书）Webhook 发送结构化日志，卡片样式清晰、移动端友好。
 
-## 安装
+## 📦 安装
 
 ```bash
 go get github.com/KCNyu/lark-logger
 ```
 
-## 快速开始（必须传入 context）
+## ⚡ 快速开始（必须传入 context）
 
 ```go
 import (
@@ -33,12 +40,12 @@ func main() {
 }
 ```
 
-## 环境变量
+## 🔧 环境变量
 
-- LARK_WEBHOOK_URL：你的机器人 webhook
-- LARK_TEST_MODE：测试模式（`true` 可跳过真实发送）
+- `LARK_WEBHOOK_URL`：你的机器人 webhook 🤖
+- `LARK_TEST_MODE`：测试模式（`true` 可跳过真实发送）✅
 
-## 可选操作按钮
+## 🎨 可选操作按钮
 
 ```go
 logger := larklogger.NewLogger(ctx, client,
@@ -49,15 +56,18 @@ logger := larklogger.NewLogger(ctx, client,
 )
 ```
 
-## 本地测试
+## 📸 截图
 
-- `make test` 会自动启用测试模式并跳过外部发送
-- 或直接运行：`LARK_TEST_MODE=true go test ./src/larklogger/...`
+- 🖥️ 桌面卡片展示：
 
-## 截图
+![Desktop card](./images/desktop_card.png)
 
-请将图片放在 `docs/images/` 下，并替换 README 中的占位图。
+- 🔘 桌面按钮/确认示例：
 
-## 许可证
+![Desktop buttons](./images/desktop_button.png)
 
-MIT
+## 📬 联系方式
+
+如有问题、建议或需求：
+- 🐛 提交 Issue：[GitHub Issues](https://github.com/KCNyu/lark-logger/issues)
+- 📧 邮箱：[shengyu.li.evgeny@gmail.com](mailto:shengyu.li.evgeny@gmail.com)

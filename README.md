@@ -1,16 +1,23 @@
-# lark-logger
+# 🚀 lark-logger
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/KCNyu/lark-logger.svg)](https://pkg.go.dev/github.com/KCNyu/lark-logger)
+[![Go Report Card](https://goreportcard.com/badge/github.com/KCNyu/lark-logger)](https://goreportcard.com/report/github.com/KCNyu/lark-logger)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/KCNyu/lark-logger)](https://github.com/KCNyu/lark-logger/stargazers)
+[![Go Version](https://img.shields.io/badge/go-%3E%3D%201.19-blue)](https://go.dev/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/KCNyu/lark-logger/pulls)
 
 English | [中文文档](docs/README_zh.md)
 
-A minimal Go SDK for sending structured logs to Lark (Feishu) via webhook using clean, mobile-friendly cards.
+🎯 A minimal Go SDK for sending structured logs to Lark (Feishu) via webhook using clean, mobile-friendly cards.
 
-## Install
+## 📦 Install
 
 ```bash
 go get github.com/KCNyu/lark-logger
 ```
 
-## Quick start (context required)
+## ⚡ Quick start (context required)
 
 ```go
 import (
@@ -33,12 +40,12 @@ func main() {
 }
 ```
 
-## Environment
+## 🔧 Environment
 
-- LARK_WEBHOOK_URL: your bot webhook
-- LARK_TEST_MODE: set `true` to skip real sends in tests
+- `LARK_WEBHOOK_URL`: your bot webhook 🤖
+- `LARK_TEST_MODE`: set `true` to skip real sends in tests ✅
 
-## Buttons (optional)
+## 🎨 Buttons (optional)
 
 ```go
 logger := larklogger.NewLogger(ctx, client,
@@ -49,41 +56,23 @@ logger := larklogger.NewLogger(ctx, client,
 )
 ```
 
-## Local testing
+## 🧪 Local testing
 
-- `make test` sets test mode automatically and skips external sends
-- Or: `LARK_TEST_MODE=true go test ./src/larklogger/...`
+- ✅ `make test` sets test mode automatically and skips external sends
+- 🔄 Or: `LARK_TEST_MODE=true go test ./src/larklogger/...`
 
-## Screenshots
+## 📸 Screenshots
 
-See placeholders below; replace with real images under `docs/images/`.
+- 🖥️ Desktop card:
 
-### CLI output
+![Desktop card](docs/images/desktop_card.png)
 
-![CLI output placeholder](docs/images/cli_output.png)
+- 🔘 Desktop buttons:
 
-### Cards — Desktop vs Mobile
+![Desktop buttons](docs/images/desktop_button.png)
 
-| Desktop | Mobile |
-| --- | --- |
-| ![Desktop card placeholder](docs/images/desktop_card.png) | ![Mobile card placeholder](docs/images/mobile_card.png) |
+## 📬 Contact
 
-### Config 2×2 Grid (edge-to-edge)
-
-| Desktop | Mobile |
-| --- | --- |
-| ![Desktop config placeholder](docs/images/desktop_config.png) | ![Mobile config placeholder](docs/images/mobile_config.png) |
-
-### KV — Short pairs (table) vs Long pairs (stacked block)
-
-| Short KV (table) | Long KV (stacked) |
-| --- | --- |
-| ![Short KV placeholder](docs/images/kv_short.png) | ![Long KV placeholder](docs/images/kv_long.png) |
-
-### Buttons & confirmations
-
-![Buttons placeholder](docs/images/buttons.png)
-
-## License
-
-MIT
+Questions, feedback or feature requests:
+- 🐛 Open an issue: [GitHub Issues](https://github.com/KCNyu/lark-logger/issues)
+- 📧 Email: [shengyu.li.evgeny@gmail.com](mailto:shengyu.li.evgeny@gmail.com)
