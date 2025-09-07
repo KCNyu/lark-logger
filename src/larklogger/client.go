@@ -2,6 +2,7 @@ package larklogger
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -87,7 +88,7 @@ func (c *LarkClient) SendCard(card *Card) error {
 		return fmt.Errorf("failed to marshal card: %w", err)
 	}
 
-	return c.sendWithRetry(jsonData)
+	return c.sendWithRetryCtx(context.Background(), jsonData)
 }
 
 // SendText sends a simple text message to the Lark webhook
@@ -104,11 +105,35 @@ func (c *LarkClient) SendText(text string) error {
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	return c.sendWithRetry(jsonData)
+	return c.sendWithRetryCtx(context.Background(), jsonData)
+}
+
+// SendCardCtx sends a card with a context to control request lifecycle
+func (c *LarkClient) SendCardCtx(ctx context.Context, card *Card) error {
+	jsonData, err := json.Marshal(card)
+	if err != nil {
+		return fmt.Errorf("failed to marshal card: %w", err)
+	}
+	return c.sendWithRetryCtx(ctx, jsonData)
+}
+
+// SendTextCtx sends a text message with a context
+func (c *LarkClient) SendTextCtx(ctx context.Context, text string) error {
+	payload := map[string]interface{}{
+		"msg_type": "text",
+		"content": map[string]string{
+			"text": text,
+		},
+	}
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %w", err)
+	}
+	return c.sendWithRetryCtx(ctx, jsonData)
 }
 
 // sendWithRetry sends the request with retry logic
-func (c *LarkClient) sendWithRetry(data []byte) error {
+func (c *LarkClient) sendWithRetryCtx(ctx context.Context, data []byte) error {
 	var lastErr error
 
 	for i := 0; i <= c.opts.RetryCount; i++ {
@@ -116,7 +141,7 @@ func (c *LarkClient) sendWithRetry(data []byte) error {
 			time.Sleep(c.opts.RetryDelay)
 		}
 
-		err := c.sendRequest(data)
+		err := c.sendRequestCtx(ctx, data)
 		if err == nil {
 			return nil
 		}
@@ -127,9 +152,9 @@ func (c *LarkClient) sendWithRetry(data []byte) error {
 	return fmt.Errorf("failed to send message after %d retries: %w", c.opts.RetryCount, lastErr)
 }
 
-// sendRequest sends a single HTTP request
-func (c *LarkClient) sendRequest(data []byte) error {
-	req, err := http.NewRequest("POST", c.webhookURL, bytes.NewBuffer(data))
+// sendRequestCtx sends a single HTTP request with context
+func (c *LarkClient) sendRequestCtx(ctx context.Context, data []byte) error {
+	req, err := http.NewRequestWithContext(ctx, "POST", c.webhookURL, bytes.NewBuffer(data))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}

@@ -1,6 +1,7 @@
 package larklogger
 
 import (
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -8,9 +9,10 @@ import (
 
 func TestNewLarkLogger(t *testing.T) {
 	client := NewLarkClient("https://example.com/webhook")
+	ctx := context.Background()
 
 	t.Run("with default options", func(t *testing.T) {
-		logger := NewLarkLogger(client)
+		logger := NewLarkLogger(ctx, client)
 		larkLogger := logger.(*LarkLogger)
 
 		if larkLogger.opts.Service != "default-service" {
@@ -25,7 +27,7 @@ func TestNewLarkLogger(t *testing.T) {
 	})
 
 	t.Run("with custom options", func(t *testing.T) {
-		logger := NewLarkLogger(client,
+		logger := NewLarkLogger(ctx, client,
 			WithService("test-service"),
 			WithEnv("production"),
 			WithHostname("server-01"),
@@ -50,7 +52,7 @@ func TestNewLarkLogger(t *testing.T) {
 
 func TestLarkLoggerBuildLogCard(t *testing.T) {
 	client := NewLarkClient("https://example.com/webhook")
-	logger := NewLarkLogger(client, WithTitle("System Log"))
+	logger := NewLarkLogger(context.Background(), client, WithTitle("System Log"))
 
 	t.Run("info level card", func(t *testing.T) {
 		fields := map[string]interface{}{
@@ -174,7 +176,7 @@ func TestLoggerInfof(t *testing.T) {
 	}
 
 	client := NewLarkClient("https://test.webhook.url")
-	logger := NewLarkLogger(client, WithTitle("Test Logger"))
+	logger := NewLarkLogger(context.Background(), client, WithTitle("Test Logger"))
 
 	t.Run("infof with key-value pairs", func(t *testing.T) {
 		// This will test the Infof method

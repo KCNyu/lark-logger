@@ -1,6 +1,7 @@
 package larklogger
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -26,8 +27,9 @@ type Logger interface {
 
 // LarkLogger implements the Logger interface
 type LarkLogger struct {
-	client *LarkClient
-	opts   *LoggerConfig
+	client  *LarkClient
+	opts    *LoggerConfig
+	baseCtx context.Context
 }
 
 // LoggerConfig holds logger configuration
@@ -44,7 +46,7 @@ type LoggerConfig struct {
 type LoggerOption func(*LoggerConfig)
 
 // NewLarkLogger creates a new LarkLogger instance
-func NewLarkLogger(client *LarkClient, opts ...LoggerOption) Logger {
+func NewLarkLogger(ctx context.Context, client *LarkClient, opts ...LoggerOption) Logger {
 	config := &LoggerConfig{
 		Service:    "default-service",
 		Env:        "development",
@@ -58,9 +60,13 @@ func NewLarkLogger(client *LarkClient, opts ...LoggerOption) Logger {
 		opt(config)
 	}
 
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	return &LarkLogger{
-		client: client,
-		opts:   config,
+		client:  client,
+		opts:    config,
+		baseCtx: ctx,
 	}
 }
 
@@ -79,6 +85,19 @@ func (l *LarkLogger) Error(message string, fields map[string]interface{}) {
 	l.log(LevelError, message, fields)
 }
 
+// Context-aware variants
+func (l *LarkLogger) InfoCtx(ctx context.Context, message string, fields map[string]interface{}) {
+	l.logCtx(ctx, LevelInfo, message, fields)
+}
+
+func (l *LarkLogger) WarnCtx(ctx context.Context, message string, fields map[string]interface{}) {
+	l.logCtx(ctx, LevelWarn, message, fields)
+}
+
+func (l *LarkLogger) ErrorCtx(ctx context.Context, message string, fields map[string]interface{}) {
+	l.logCtx(ctx, LevelError, message, fields)
+}
+
 // Infof logs an info level message with formatted title and key-value pairs
 func (l *LarkLogger) Infof(title string, args ...interface{}) {
 	fields := l.parseKeyValuePairs(args...)
@@ -95,6 +114,22 @@ func (l *LarkLogger) Warnf(title string, args ...interface{}) {
 func (l *LarkLogger) Errorf(title string, args ...interface{}) {
 	fields := l.parseKeyValuePairs(args...)
 	l.log(LevelError, title, fields)
+}
+
+// Context-aware formatted variants
+func (l *LarkLogger) InfofCtx(ctx context.Context, title string, args ...interface{}) {
+	fields := l.parseKeyValuePairs(args...)
+	l.logCtx(ctx, LevelInfo, title, fields)
+}
+
+func (l *LarkLogger) WarnfCtx(ctx context.Context, title string, args ...interface{}) {
+	fields := l.parseKeyValuePairs(args...)
+	l.logCtx(ctx, LevelWarn, title, fields)
+}
+
+func (l *LarkLogger) ErrorfCtx(ctx context.Context, title string, args ...interface{}) {
+	fields := l.parseKeyValuePairs(args...)
+	l.logCtx(ctx, LevelError, title, fields)
 }
 
 // parseKeyValuePairs parses alternating key-value pairs from args
@@ -120,8 +155,12 @@ func (l *LarkLogger) parseKeyValuePairs(args ...interface{}) map[string]interfac
 
 // log sends a log message to Lark
 func (l *LarkLogger) log(level LogLevel, message string, fields map[string]interface{}) {
+	l.logCtx(l.baseCtx, level, message, fields)
+}
+
+func (l *LarkLogger) logCtx(ctx context.Context, level LogLevel, message string, fields map[string]interface{}) {
 	card := l.buildLogCard(level, message, fields)
-	if err := l.client.SendCard(card); err != nil {
+	if err := l.client.SendCardCtx(ctx, card); err != nil {
 		// In a real implementation, you might want to fallback to console logging
 		fmt.Printf("Failed to send log to Lark: %v\n", err)
 	}

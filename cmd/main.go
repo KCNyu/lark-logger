@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -8,6 +9,8 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	// Get webhook URL from environment variable
 	webhookURL := larklogger.GetWebhookURL()
 
@@ -19,9 +22,9 @@ func main() {
 		log.Println("🚀 Running in PRODUCTION MODE - messages will be sent to Lark")
 	}
 
-	// Create logger with webhook URL and options
-	logger := larklogger.New(
-		webhookURL,
+	// Create client and logger with ctx
+	client := larklogger.NewClient(webhookURL)
+	logger := larklogger.NewLogger(ctx, client,
 		larklogger.WithEnv("production"),
 		larklogger.WithTitle("System Monitor"),
 	)
@@ -40,8 +43,7 @@ func main() {
 	})
 
 	// Create a logger with configuration section enabled
-	configLogger := larklogger.New(
-		webhookURL,
+	configLogger := larklogger.NewLogger(ctx, client,
 		larklogger.WithService("config-demo"),
 		larklogger.WithEnv("production"),
 		larklogger.WithHostname("server-01"),
@@ -56,13 +58,8 @@ func main() {
 	})
 
 	// Create a logger with buttons for action items
-	buttonLogger := larklogger.New(
-		webhookURL,
-		larklogger.WithService("action-demo"),
-		larklogger.WithEnv("production"),
-		larklogger.WithHostname("server-01"),
+	buttonLogger := larklogger.NewLogger(ctx, client,
 		larklogger.WithTitle("Action Required"),
-		larklogger.WithShowConfig(true),
 		larklogger.WithButtons([]larklogger.Button{
 			{
 				Text:  "View Logs",
@@ -97,21 +94,6 @@ func main() {
 	logger.Infof("Service health check", "status", "healthy", "response_time", "120ms", "uptime", "2h30m")
 	logger.Warnf("Memory usage approaching threshold", "usage", "87%", "threshold", "85%", "recommendation", "consider horizontal scaling")
 	logger.Errorf("Database connection pool exhausted", "error", "connection timeout after 30s", "retry_count", 3, "pool_size", 20)
-
-	// Send structured message using logger
-	logger.Info("🚀 Lark Logger Demo - All systems operational!", map[string]interface{}{
-		"demo":   true,
-		"status": "operational",
-	})
-
-	// Send system health report using structured logging
-	logger.Info("System Health Report", map[string]interface{}{
-		"Memory":        "67%",
-		"Disk Space":    "23%",
-		"Network I/O":   "12%",
-		"Response Time": "120ms",
-		"Report Type":   "Health Check",
-	})
 
 	fmt.Println("🎊 All messages sent successfully! Check your Lark workspace.")
 }

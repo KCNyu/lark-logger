@@ -1,31 +1,12 @@
 // Package larklogger provides a Go SDK for sending structured log messages
 // to Lark (Feishu) webhook bots with beautiful interactive cards.
 //
-// Features:
-// - Support for Info, Warn, and Error log levels
-// - Beautiful card formatting with emojis and colors
-// - Structured logging with map[string]interface{} fields
-// - Configurable retry logic and timeouts
-// - Type-safe configuration options
-//
-// Example usage:
-//
-//	client := larklogger.NewClient("https://open.feishu.cn/open-apis/bot/v2/hook/xxx")
-//	logger := larklogger.NewLogger(client)
-//
-//	logger.Info("Service started successfully", map[string]interface{}{
-//		"port": 8080,
-//		"version": "1.0.0",
-//	})
-//
-//	logger.Error("Database connection failed", map[string]interface{}{
-//		"error": "connection timeout",
-//		"retry_count": 3,
-//	})
+// Example usage is in README.
 package larklogger
 
 // Re-export all public types and functions from internal package
 import (
+	"context"
 	"time"
 
 	"github.com/KCNyu/lark-logger/src/larklogger"
@@ -77,28 +58,9 @@ func NewClient(webhookURL string, opts ...ClientOption) *Client {
 	return larklogger.NewLarkClient(webhookURL, opts...)
 }
 
-// NewLogger creates a new Logger instance
-func NewLogger(client *Client, opts ...LoggerOption) Logger {
-	return larklogger.NewLarkLogger(client, opts...)
-}
-
-// New creates a new Logger with webhook URL and options (simplified API)
-func New(webhookURL string, opts ...interface{}) Logger {
-	// Separate client and logger options
-	var clientOpts []ClientOption
-	var loggerOpts []LoggerOption
-
-	for _, opt := range opts {
-		switch o := opt.(type) {
-		case ClientOption:
-			clientOpts = append(clientOpts, o)
-		case LoggerOption:
-			loggerOpts = append(loggerOpts, o)
-		}
-	}
-
-	client := NewClient(webhookURL, clientOpts...)
-	return NewLogger(client, loggerOpts...)
+// NewLogger creates a new Logger instance (context required)
+func NewLogger(ctx context.Context, client *Client, opts ...LoggerOption) Logger {
+	return larklogger.NewLarkLogger(ctx, client, opts...)
 }
 
 // NewCardBuilder creates a new card builder
