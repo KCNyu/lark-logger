@@ -36,7 +36,8 @@ type LoggerConfig struct {
 	Env        string
 	Hostname   string
 	Title      string
-	ShowConfig bool // Whether to show configuration section in logs
+	ShowConfig bool     // Whether to show configuration section in logs
+	Buttons    []Button // Optional buttons to add to log cards
 }
 
 // LoggerOption is a function that configures the logger
@@ -50,6 +51,7 @@ func NewLarkLogger(client *LarkClient, opts ...LoggerOption) Logger {
 		Hostname:   "localhost",
 		Title:      "System Log",
 		ShowConfig: false,
+		Buttons:    nil,
 	}
 
 	for _, opt := range opts {
@@ -137,7 +139,16 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 	builder := NewCardBuilder().SetHeader(mainTitle, template)
 
 	// Add subtitle with message and level emoji
-	subtitle := fmt.Sprintf("%s %s", getLogLevelEmoji(level), message)
+	subtitleEmoji := EmojiDefault
+	switch level {
+	case LevelInfo:
+		subtitleEmoji = "✅"
+	case LevelWarn:
+		subtitleEmoji = "🟠"
+	case LevelError:
+		subtitleEmoji = "🚨"
+	}
+	subtitle := fmt.Sprintf("%s %s", subtitleEmoji, message)
 	builder.AddSubtitle(subtitle)
 
 	// Add timestamp
@@ -168,6 +179,12 @@ func (l *LarkLogger) buildLogCard(level LogLevel, message string, fields map[str
 		builder.AddDivider()
 		customFields := mapToKVItems(fields)
 		builder.AddKVTable(customFields)
+	}
+
+	// Add buttons if configured
+	if len(l.opts.Buttons) > 0 {
+		builder.AddDivider()
+		builder.AddButtons(l.opts.Buttons)
 	}
 
 	return builder.Build()
@@ -201,5 +218,11 @@ func WithTitle(title string) LoggerOption {
 func WithShowConfig(show bool) LoggerOption {
 	return func(c *LoggerConfig) {
 		c.ShowConfig = show
+	}
+}
+
+func WithButtons(buttons []Button) LoggerOption {
+	return func(c *LoggerConfig) {
+		c.Buttons = buttons
 	}
 }

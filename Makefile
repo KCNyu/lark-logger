@@ -19,11 +19,11 @@ build-cmd: ## Build the example command
 # Test targets
 test: ## Run tests
 	@echo "Running tests..."
-	go test -v ./src/larklogger/...
+	@LARK_TEST_MODE=true LARK_WEBHOOK_URL=https://test.webhook.url go test -v ./src/larklogger/...
 
 test-coverage: ## Run tests with coverage
 	@echo "Running tests with coverage..."
-	go test -v -coverprofile=coverage.out ./src/larklogger/...
+	@LARK_TEST_MODE=true LARK_WEBHOOK_URL=https://test.webhook.url go test -v -coverprofile=coverage.out ./src/larklogger/...
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
 

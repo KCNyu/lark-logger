@@ -2,6 +2,7 @@ package larklogger
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -167,8 +168,8 @@ func TestLoggerOptions(t *testing.T) {
 }
 
 func TestLoggerInfof(t *testing.T) {
-	// Skip tests that use mock webhook URLs
-	if os.Getenv("LARK_TEST_MODE") == "true" {
+	// Skip tests that would send webhook (default local: GetConfig sets test URL)
+	if os.Getenv("LARK_TEST_MODE") == "true" || IsTestEnvironment() || strings.Contains(GetWebhookURL(), "test.webhook.url") {
 		t.Skip("Skipping mock webhook tests")
 	}
 
